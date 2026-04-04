@@ -89,9 +89,9 @@ export default function Dashboard() {
           </div>
 
           {/* Right side */}
-          <div className="flex-1 min-w-0 flex flex-col gap-2">
+          <div className="flex-1 min-w-0 min-h-0 flex flex-col gap-2 overflow-hidden">
             <SystemCard className=""/>
-            <TerminalCard className="flex-1"/>
+            <TerminalCard className="flex-1 min-h-0"/>
           </div>
         </MonitorContext.Provider>
       </InfoContext.Provider>
