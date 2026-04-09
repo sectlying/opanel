@@ -111,8 +111,6 @@ export function TerminalViewer({
     logsBufferRef.current = [];
 
     setLogs((current) => {
-      if(current.length + buffer.length > MAX_LOG_LINES) current.splice(0, current.length + buffer.length - MAX_LOG_LINES);
-
       if(terminalRef.current) {
         const elem = terminalRef.current;
         if(elem.scrollTop + elem.clientHeight >= elem.scrollHeight - 20) {
@@ -123,7 +121,12 @@ export function TerminalViewer({
           scrollingRef.current = false;
         }
       }
-      return [...current, ...buffer];
+
+      const newLogs = [...current, ...buffer];
+      if(newLogs.length > MAX_LOG_LINES) {
+        newLogs.splice(0, newLogs.length - MAX_LOG_LINES);
+      }
+      return newLogs;
     });
   };
 
