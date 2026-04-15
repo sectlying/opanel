@@ -614,5 +614,6 @@
   "settings.update.status.latest": "Already the latest version",
   "settings.update.release-note.title": "{0} Release Notes",
   "settings.update.preview-channel": "Preview Channel",
+  "settings.update.download-update": "Download",
   "settings.reset": "Reset Settings"
 }

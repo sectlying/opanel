@@ -1,9 +1,8 @@
 import type { ArrayItem, GithubReleaseResponse } from "@/lib/types";
+import Link from "next/link";
 import { type PropsWithChildren, useEffect, useState } from "react";
 import * as MarkdownJSX from "markdown-to-jsx";
-import axios from "axios";
-import { compare } from "semver";
-import { RotateCw } from "lucide-react";
+import { RotateCw, SquareArrowOutUpRight } from "lucide-react";
 import {
   Dialog,
   DialogClose,
@@ -19,12 +18,13 @@ import { Logo } from "@/components/logo";
 import { Spinner } from "@/components/ui/spinner";
 import { version } from "@/lib/global";
 import { googleSansCode } from "@/lib/fonts";
-import { cn, isPreviewVersion } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toastError } from "@/lib/api";
 import { changeSettings, getSettings } from "@/lib/settings";
 import { $ } from "@/lib/i18n";
+import { checkUpdate } from "@/lib/update";
 
 function preprocessMarkdown(markdown: string): string {
   // Github username
@@ -47,23 +47,12 @@ export function UpdateDialog({
   const [releaseInfo, setReleaseInfo] = useState<ArrayItem<GithubReleaseResponse> | null>(null);
   const [previewEnabled, setPreviewEnabled] = useState(getSettings("system.preview-channel"));
 
-  const checkUpdate = async () => {
+  const fetchUpdateInfo = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get<GithubReleaseResponse>("https://api.github.com/repos/opanel-mc/opanel/releases");
-
-      for(const release of data) {
-        const tagName = release.tag_name.replaceAll("rc", "-rc");
-        if(!previewEnabled && (release.prerelease || isPreviewVersion(tagName))) continue;
-        if(compare(tagName, version) > 0) {
-          setHasNewUpdate(true);
-          setReleaseInfo(release);
-          setLoading(false);
-          return;
-        }
-      }
-
-      setHasNewUpdate(false);
+      const { hasNewUpdate, releaseInfo } = await checkUpdate();
+      setHasNewUpdate(hasNewUpdate);
+      setReleaseInfo(releaseInfo);
       setLoading(false);
     } catch (e: any) {
       toastError(e, $("settings.update.error"), [
@@ -80,7 +69,7 @@ export function UpdateDialog({
   }, [previewEnabled]);
 
   return (
-    <Dialog onOpenChange={(open) => (open && hasNewUpdate === null) && checkUpdate()}>
+    <Dialog onOpenChange={(open) => (open && hasNewUpdate === null) && fetchUpdateInfo()}>
       <DialogTrigger asChild={asChild}>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -115,7 +104,7 @@ export function UpdateDialog({
               size="icon"
               className="ml-auto cursor-pointer"
               disabled={loading}
-              onClick={() => checkUpdate()}>
+              onClick={() => fetchUpdateInfo()}>
               {loading ? <Spinner /> : <RotateCw />}
             </Button>
           </div>
@@ -140,11 +129,22 @@ export function UpdateDialog({
               onCheckedChange={setPreviewEnabled}/>
             <Label>{$("settings.update.preview-channel")}</Label>
           </div>
-          <DialogClose asChild>
-            <Button variant="outline">
-              {$("dialog.close")}
-            </Button>
-          </DialogClose>
+
+          <div className="space-x-2">
+            {hasNewUpdate && (
+              <Button className="ml-auto" asChild>
+                <Link href="https://dist.opanel.cn" target="_blank" rel="noopener noreferrer">
+                  {$("settings.update.download-update")}
+                  <SquareArrowOutUpRight className="!size-3"/>
+                </Link>
+              </Button>
+            )}
+            <DialogClose asChild>
+              <Button variant="outline">
+                {$("dialog.close")}
+              </Button>
+            </DialogClose>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
