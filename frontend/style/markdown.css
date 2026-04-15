@@ -7,7 +7,7 @@
       @apply font-light;
     }
     p {
-      @apply leading-[1.75rem];
+      @apply leading-[1.5rem];
     }
     b, strong {
       @apply font-bold;
@@ -50,6 +50,17 @@
     }
     ol li {
       @apply list-decimal marker:text-secondary-foreground;
+    }
+    blockquote {
+      &.markdown-alert-note {
+        @apply my-4 pl-4 border-l-3 border-l-blue-600 dark:border-l-blue-500;
+        header {
+          @apply font-semibold text-blue-600 dark:text-blue-500;
+        }
+        p {
+          @apply mt-1 text-xs leading-5;
+        }
+      }
     }
   }
 }
