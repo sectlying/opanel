@@ -614,5 +614,6 @@
   "settings.update.status.latest": "現在すでに最新のバージョンです",
   "settings.update.release-note.title": "{0} 更新ログ",
   "settings.update.preview-channel": "プレビュー版",
+  "settings.update.download-update": "ダウンロード",
   "settings.reset": "デフォルト設定に戻す"
 }

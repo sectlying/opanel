@@ -614,5 +614,6 @@
   "settings.update.status.latest": "當前已是最新版本",
   "settings.update.release-note.title": "{0} 更新日誌",
   "settings.update.preview-channel": "預覽版",
+  "settings.update.download-update": "下載更新",
   "settings.reset": "恢復預設"
 }

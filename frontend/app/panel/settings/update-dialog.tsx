@@ -134,7 +134,7 @@ export function UpdateDialog({
             {hasNewUpdate && (
               <Button className="ml-auto" asChild>
                 <Link href="https://dist.opanel.cn" target="_blank" rel="noopener noreferrer">
-                  下载更新
+                  {$("settings.update.download-update")}
                   <SquareArrowOutUpRight className="!size-3"/>
                 </Link>
               </Button>
