@@ -204,7 +204,7 @@ public class Utils {
 
         StringBuilder sb = new StringBuilder();
         for(byte b : randBytes) {
-            sb.append(String.format("%02x", b));
+            sb.append(String.format("%02x", b & 0xff));
         }
         return sb.toString();
     }
