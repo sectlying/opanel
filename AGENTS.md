@@ -65,7 +65,7 @@ OPanel
 │  ├─ scripts/                             # 构建/预处理脚本
 │  └─ style/                               # 全局样式与主题样式
 │
-├─ bukkit-helper/                          # Bukkit/Spigot/Paper/Folia 公共实现
+├─ bukkit-helper/                          # Bukkit/Spigot/Paper/Leaves/Folia 公共实现
 ├─ fabric-helper/                          # Fabric 公共实现（1.21.11及以下）
 ├─ fabric-helper-unmapped/                 # Fabric 公共实现（26.1及以上）
 ├─ forge-helper/                           # Forge 公共实现
