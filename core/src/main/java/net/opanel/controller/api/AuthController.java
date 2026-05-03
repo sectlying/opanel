@@ -65,7 +65,16 @@ public class AuthController extends BaseController {
             removeFailedRecord(reqIp);
 
             String token = JwtManager.generateToken(storedRealKey, plugin.getConfig().salt);
-            ctx.cookie(JwtManager.createCookie("token", token, (int) TimeUnit.DAYS.toSeconds(1), plugin.getConfig().cookieSecure));
+            // Context.cookie() provided by Javalin called List.removeFirst() method.
+            // But the method was introduced in Java 21, so if OPanel is running under
+            // Java versions lower than 21, this method will throw a NoSuchMethodError.
+            //
+            // Just simply catch it and do nothing.
+            try {
+                ctx.cookie(JwtManager.createCookie("token", token, (int) TimeUnit.DAYS.toSeconds(1), plugin.getConfig().cookieSecure));
+            } catch (NoSuchMethodError e) {
+                //
+            }
             sendResponse(ctx, HttpStatus.OK);
         } else {
             final int current = incrementFailedCount(reqIp);
