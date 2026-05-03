@@ -8,13 +8,14 @@ import {
   useState
 } from "react";
 import getCaretCoordinates from "textarea-caret";
-import { X } from "lucide-react";
+import { SquareSlash, X } from "lucide-react";
 import { InputContext } from "@/contexts/input-context";
 import { cn, getCurrentArgumentIndex, getCurrentState, getInputtedArgumentStr } from "@/lib/utils";
 import { Button } from "./ui/button";
 import { googleSansCode } from "@/lib/fonts";
 import { usePrevious } from "@/hooks/use-previous";
-import { InputGroup, InputGroupButton, InputGroupInput } from "./ui/input-group";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "./ui/input-group";
+import { useKeydown } from "@/hooks/use-keydown";
 
 function AutocompleteItem({
   name,
@@ -116,16 +117,18 @@ export function AutocompleteInput({
         complete();
         break;
       case "ArrowUp":
-        if(cSelected === null) return;
-        e.preventDefault();
-        const nextSelectedUp = (cSelected > 0) ? (cSelected - 1) : (advised.length - 1);
-        setSelected(nextSelectedUp);
+        if(cSelected !== null) {
+          e.preventDefault();
+          const nextSelectedUp = (cSelected > 0) ? (cSelected - 1) : (advised.length - 1);
+          setSelected(nextSelectedUp);
+        }
         break;
       case "ArrowDown":
-        if(cSelected === null) return;
-        e.preventDefault();
-        const nextSelectedDown = (cSelected < advised.length - 1) ? (cSelected + 1) : 0;
-        setSelected(nextSelectedDown);
+        if(cSelected !== null) {
+          e.preventDefault();
+          const nextSelectedDown = (cSelected < advised.length - 1) ? (cSelected + 1) : 0;
+          setSelected(nextSelectedDown);
+        }
         break;
     }
 
@@ -192,6 +195,10 @@ export function AutocompleteInput({
     }
   }, [selected]);
 
+  useKeydown("a", { ctrl: true }, () => {
+    inputRef.current?.select();
+  });
+
   return (
     <InputContext.Provider value={{
       argValue: getInputtedArgumentStr(value, Math.min(inputRef.current?.selectionStart ?? 0, value.length)),
@@ -200,6 +207,9 @@ export function AutocompleteInput({
       complete
     }}>
       <InputGroup ref={inputGroupRef}>
+        <InputGroupAddon>
+          <SquareSlash />
+        </InputGroupAddon>
         <InputGroupInput
           {...props}
           autoComplete="off"
@@ -213,14 +223,16 @@ export function AutocompleteInput({
           data-current-selected={selected ?? 0}
           data-testid="autocomplete-input"
           ref={inputRef}/>
-        <InputGroupButton
-          className={cn(
-            "hover:bg-transparent! cursor-pointer",
-            (!inputRef.current || inputRef.current.value.length === 0) && "hidden"
-          )}
-          onClick={() => handleClear()}>
-          <X />
-        </InputGroupButton>
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton
+            className={cn(
+              "hover:bg-transparent! cursor-pointer",
+              (!inputRef.current || inputRef.current.value.length === 0) && "hidden"
+            )}
+            onClick={() => handleClear()}>
+            <X />
+          </InputGroupButton>
+        </InputGroupAddon>
       </InputGroup>
       <div
         className={cn(
