@@ -148,7 +148,7 @@
   "dashboard.system.item.core": "コア数",
   "dashboard.system.item.memory": "メモリ",
   "dashboard.terminal.title": "サーバーのバックエンド",
-  "dashboard.terminal.input.placeholder": "メッセージ / コマンドを送信...",
+  "dashboard.terminal.input.placeholder": "コマンドを送信...",
   "dashboard.terminal.input.tooltip": "バックグラウンドページに移動",
   "dashboard.favicon.title": "サーバーアイコンを変更する",
   "dashboard.favicon.description": "ここに画像をアップロードして、サーバーの新しいアイコンとして使用します。",

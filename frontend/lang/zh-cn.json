@@ -148,7 +148,7 @@
   "dashboard.system.item.core": "核心数",
   "dashboard.system.item.memory": "内存",
   "dashboard.terminal.title": "服务器后台",
-  "dashboard.terminal.input.placeholder": "发送消息 / 指令...",
+  "dashboard.terminal.input.placeholder": "发送指令...",
   "dashboard.terminal.input.tooltip": "转至后台页面",
   "dashboard.favicon.title": "修改服务器图标",
   "dashboard.favicon.description": "在此上传图片作为服务器的新图标。",
