@@ -51,15 +51,15 @@ export function PluginDialog({
             </DialogDescription>
           </div>
         </DialogHeader>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 min-w-0">
           <div className="pb-2 border-b flex justify-between items-end">
-            <div className="pb-1 text-sm leading-5.5">
+            <div className="pb-1 text-sm leading-5.5 min-w-0">
               <span className="text-muted-foreground">{$("plugins.detailed-info.author")}</span>
               <span className="space-x-2 wrap-anywhere *:whitespace-nowrap">
                 {
                   plugin.authors.length > 0
                   ? plugin.authors.map((author, i) => (
-                    <span key={i}>{author}</span>
+                    <span className="block truncate" key={i}>{author}</span>
                   ))
                   : <span className="italic">{$("plugins.detailed-info.anonymous-author")}</span>
                 }
