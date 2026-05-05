@@ -108,6 +108,9 @@
 
   "dashboard.title": "ダッシュボード",
   "dashboard.error": "サーバーに接続できません",
+  "dashboard.empty.title": "ダッシュボードの読み込みに失敗しました",
+  "dashboard.empty.description": "ページを更新するか、{0}でブラウザのコンソールを開くか、サーバーのログを確認して、OPanelに問題を報告してください",
+  "dashboard.empty.refresh": "更新",
   "dashboard.info.version": "バージョン:",
   "dashboard.info.port": "ポート:",
   "dashboard.info.status.running": "実行中",

@@ -108,6 +108,9 @@
 
   "dashboard.title": "仪表盘",
   "dashboard.error": "无法连接到服务器",
+  "dashboard.empty.title": "仪表盘加载失败",
+  "dashboard.empty.description": "尝试刷新页面、使用{0}打开浏览器控制台，或检查服务器后台日志，并向OPanel反馈问题",
+  "dashboard.empty.refresh": "刷新",
   "dashboard.info.version": "版本:",
   "dashboard.info.port": "端口:",
   "dashboard.info.status.running": "正在运行",
