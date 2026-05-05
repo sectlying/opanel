@@ -108,6 +108,9 @@
 
   "dashboard.title": "儀表板",
   "dashboard.error": "無法連接到伺服器",
+  "dashboard.empty.title": "儀表板載入失敗",
+  "dashboard.empty.description": "嘗試重新整理頁面、使用{0}開啟瀏覽器控制台，或檢查伺服器後台日誌，並向OPanel反饋問題",
+  "dashboard.empty.refresh": "重新整理",
   "dashboard.info.version": "版本:",
   "dashboard.info.port": "連接埠:",
   "dashboard.info.status.running": "正在運行",

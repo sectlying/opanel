@@ -108,6 +108,9 @@
 
   "dashboard.title": "Dashboard",
   "dashboard.error": "Unable to connect to the server",
+  "dashboard.empty.title": "Dashboard failed to load",
+  "dashboard.empty.description": "Try refreshing the page, use {0} to open the browser console, or check the server logs and report the issue to OPanel",
+  "dashboard.empty.refresh": "Refresh",
   "dashboard.info.version": "Version:",
   "dashboard.info.port": "Port:",
   "dashboard.info.status.running": "Running",
