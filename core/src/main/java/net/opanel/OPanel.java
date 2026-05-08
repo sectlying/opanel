@@ -4,6 +4,7 @@ import net.opanel.common.Constants;
 import net.opanel.config.ConfigManager;
 import net.opanel.config.OPanelConfiguration;
 import net.opanel.event.OPanelPlayerInventoryChangeEvent;
+import net.opanel.map.MapRenderManager;
 import net.opanel.task.ScheduledTaskManager;
 import net.opanel.terminal.LogListenerManager;
 import net.opanel.common.OPanelServer;
@@ -35,6 +36,7 @@ public class OPanel {
 
     private final Uptimer uptimer;
     private final ScheduledTaskManager scheduledTaskManager;
+    private final MapRenderManager mapRenderManager;
     private final WebServer webServer;
     private OPanelServer server;
     private LogListenerManager logListenerManager;
@@ -54,6 +56,9 @@ public class OPanel {
 
         // Initialize scheduled task manager
         scheduledTaskManager = new ScheduledTaskManager(this);
+
+        // Initialize map renderer
+        mapRenderManager = new MapRenderManager(this);
 
         // Initialize inventory poller
         OPanelPlayerInventoryChangeEvent.registerPoller(this);
@@ -155,6 +160,10 @@ public class OPanel {
     public void stop() {
         if(scheduledTaskManager != null) {
             scheduledTaskManager.shutdown();
+        }
+
+        if(mapRenderManager != null) {
+            mapRenderManager.shutdown();
         }
 
         OPanelPlayerInventoryChangeEvent.shutdown();
