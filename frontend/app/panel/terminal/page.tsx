@@ -4,6 +4,7 @@ import type { CommandShortcut } from "@/lib/types";
 import {
   type KeyboardEvent,
   useCallback,
+  useContext,
   useEffect,
   useRef,
   useState
@@ -30,8 +31,16 @@ import { $ } from "@/lib/i18n";
 import { type ConsoleLogLevel, defaultLogLevel, TerminalClient } from "@/lib/ws/terminal";
 import { Toggle } from "@/components/ui/toggle";
 import { CreateShortcutDialog } from "./create-shortcut-dialog";
+import { VersionContext } from "@/contexts/api-context";
+
+const MCDR_COMMAND_PREFIX = "!!";
+const MCDR_AUTOCOMPLETE_LIST = [
+  "MCDR",
+  "help"
+];
 
 export default function Terminal() {
+  const versionCtx = useContext(VersionContext);
   const client = useWebSocket(TerminalClient);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const terminalContainerRef = useRef<HTMLDivElement | null>(null);
@@ -43,6 +52,7 @@ export default function Terminal() {
   const [fullscreen, setFullscreen] = useState(false);
   const [shortcuts, setShortcuts] = useState<CommandShortcut[]>(getSettings("terminal.shortcuts"));
   const [editingShortcuts, setEditingShortcuts] = useState(false);
+  const [isTypingMCDRCommand, setTypingMCDRCommand] = useState(false);
 
   const handleSend = useCallback(() => {
     if(!inputRef.current || !client) return;
@@ -94,6 +104,24 @@ export default function Terminal() {
   const handleInput = useCallback(async () => {
     if(!inputRef.current || !client) return;
     const elem = inputRef.current;
+
+    if(versionCtx?.mcdr) {
+      const hasMCDRPrefix = elem.value.startsWith(MCDR_COMMAND_PREFIX);
+      // not typing MCDR command -> start typing MCDR command
+      if(hasMCDRPrefix) {
+        setAutocompleteList(MCDR_AUTOCOMPLETE_LIST);
+        setTypingMCDRCommand(true);
+        return;
+      }
+      // typing MCDR command -> not typing MCDR command
+      // reset the states if the previous state is typing MCDR command
+      if(isTypingMCDRCommand) {
+        setAutocompleteList([]);
+        setTypingMCDRCommand(false);
+        argIndexRef.current = 0;
+      }
+    }
+
     const hasPrefix = elem.value.startsWith("/");
     const command = hasPrefix ? elem.value.substring(1) : elem.value;
 
@@ -105,7 +133,7 @@ export default function Terminal() {
       });
       argIndexRef.current = realArgIndex;
     }
-  }, [client]);
+  }, [client, versionCtx, isTypingMCDRCommand]);
 
   const handleFullscreen = () => {
     if(!terminalContainerRef.current) return;
@@ -169,6 +197,20 @@ export default function Terminal() {
         ref={terminalContainerRef}>
         <TerminalViewer client={client} level={logLevel} className="flex-1 border-none"/>
         <div className={cn("px-3 pt-1 flex flex-wrap items-center gap-1 transition-[gap]", editingShortcuts && "gap-3")}>
+          {versionCtx?.mcdr && (
+            <Button
+              size="xs"
+              disabled={editingShortcuts}
+              className={cn("cursor-pointer", googleSansCode.className)}
+              onClick={() => {
+                if(!inputRef.current) return;
+                inputRef.current.value = "!!MCDR ";
+                inputRef.current.focus();
+              }}
+              onDoubleClick={() => handleSend()}>
+              !!MCDR
+            </Button>
+          )}
           {shortcuts.map((shortcut, i) => (
             <div
               className="relative *:cursor-pointer"
@@ -232,7 +274,7 @@ export default function Terminal() {
             autoFocus
             itemList={autocompleteList}
             enabled={getSettings("terminal.autocomplete")}
-            prefix="/"
+            prefix={versionCtx?.mcdr && isTypingMCDRCommand ? MCDR_COMMAND_PREFIX : "/"}
             maxLength={256}
             onKeyDown={(e) => handleKeydown(e)}
             onInput={() => handleInput()}
