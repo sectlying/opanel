@@ -40,11 +40,16 @@ public class Tile {
         }
     }
 
+    private final int chunkX;
+    private final int chunkZ;
     private final Map<Integer, Section> sections = new HashMap<>();
     private final int[] heightMap;
     private final int minY;
 
-    public Tile(List<Section> sections, long[] packedHeightMap, boolean afterCavesCliffs) {
+    public Tile(int chunkX, int chunkZ, List<Section> sections, long[] packedHeightMap, boolean afterCavesCliffs) {
+        this.chunkX = chunkX;
+        this.chunkZ = chunkZ;
+
         for(Section section : sections) {
             this.sections.put(section.getY(), section);
         }
@@ -53,6 +58,17 @@ public class Tile {
         minY = afterCavesCliffs ? -64 : 0;
     }
 
+    public int getX() {
+        return chunkX;
+    }
+
+    public int getZ() {
+        return chunkZ;
+    }
+
+    /**
+     * @return A 16x16 two-dimensional array storing top block type ids
+     */
     public String[][] getTopBlockTypes() {
         String[][] result = new String[16][16];
         for(int z = 0; z < 16; z++) {
@@ -80,14 +96,16 @@ public class Tile {
         return storedHeight + minY - 1;
     }
 
+    public int[] getHeightMap() {
+        return heightMap;
+    }
+
     public static Section createSection(int y, List<String> palette, long[] packedBlockStates) {
         int paletteSize = palette.size();
-        // equals to Math.max(4, Math.ceil(Math.log(paletteSize) / Math.log(2)))
-        final int bitsPerValue = paletteSize <= 1 ? 4 : Math.max(4, Integer.SIZE - Integer.numberOfLeadingZeros(paletteSize - 1));
         return new Section(
             y,
             palette,
-            AnvilUtility.decodeBitpacked(packedBlockStates, bitsPerValue)
+            AnvilUtility.decodeBitpacked(packedBlockStates, AnvilUtility.paletteSizeToBitsSize(paletteSize))
         );
     }
 }

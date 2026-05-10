@@ -24,6 +24,7 @@ public class OPanel {
     public static final String JAVALIN_VERSION;
     public static final Path OPANEL_DIR_PATH = Paths.get("").resolve("opanel");
     public static final Path TMP_DIR_PATH = OPANEL_DIR_PATH.resolve(".tmp");
+    public static final Path MAP_DATA_PATH = OPANEL_DIR_PATH.resolve("mapdata");
     public static final Path INITIAL_ACCESS_KEY_PATH = OPANEL_DIR_PATH.resolve("INITIAL_ACCESS_KEY.txt");
     public static final Path MCDR_BRIDGE_FLAG_PATH = OPANEL_DIR_PATH.resolve(".mcdr_bridge_active");
 
@@ -60,6 +61,9 @@ public class OPanel {
 
         // Initialize map renderer
         mapRenderManager = new MapRenderManager(this);
+        if(!mapRenderManager.hasRenderedTiles()) {
+            mapRenderManager.renderAll();
+        }
 
         // Initialize inventory poller
         OPanelPlayerInventoryChangeEvent.registerPoller(this);
@@ -81,6 +85,10 @@ public class OPanel {
         }
         if(tmpDir.list().length > 0) {
             Utils.clearDirectoryRecursively(tmpDir.toPath());
+        }
+        File mapDataDir = MAP_DATA_PATH.toFile();
+        if(!mapDataDir.exists() && !mapDataDir.mkdir()) {
+            throw new IOException("Cannot initialize opanel/mapdata directory.");
         }
         // Remove access key txt file if exists
         File initialAccessKeyFile = INITIAL_ACCESS_KEY_PATH.toFile();
@@ -136,6 +144,10 @@ public class OPanel {
 
     public ScheduledTaskManager getScheduledTaskManager() {
         return scheduledTaskManager;
+    }
+
+    public MapRenderManager getMapRenderManager() {
+        return mapRenderManager;
     }
 
     public WebServer getWebServer() {
