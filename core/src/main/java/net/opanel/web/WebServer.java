@@ -96,6 +96,7 @@ public class WebServer {
         IconController iconController = new IconController(plugin);
         InfoController infoController = new InfoController(plugin);
         LogsController logsController = new LogsController(plugin);
+        MapController mapController = new MapController(plugin);
         MonitorController monitorController = new MonitorController(plugin);
         PlayersController playersController = new PlayersController(plugin);
         SavesController savesController = new SavesController(plugin);
@@ -173,6 +174,7 @@ public class WebServer {
                 delete("/", logsController.clearLogs);
                 delete("{fileName}", logsController.deleteLog);
             });
+            get("map/tile/{x}/{z}", mapController.getTile);
             get("monitor", monitorController.getMonitor);
             path("players", () -> {
                 get("/", playersController.getPlayersOverview);

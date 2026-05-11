@@ -31,7 +31,13 @@ public class TileRenderTask implements Runnable {
         String regionFileName = region.getPath().getFileName().toString();
 
         for(Tile tile : tiles) {
-            int[] pos = AnvilUtility.getGlobalChunkPosition(regionFileName, tile.getX(), tile.getZ());
+            final int[] pos;
+            try {
+                pos = AnvilUtility.getGlobalChunkPosition(regionFileName, tile.getX(), tile.getZ());
+            } catch (NumberFormatException e) {
+                continue;
+            }
+
             try(FileOutputStream fos = new FileOutputStream(OPanel.MAP_DATA_PATH.resolve(pos[0] +"."+ pos[1] +".omap").toFile())) {
                 compressTileToStream(tile, fos);
             } catch (IOException e) {

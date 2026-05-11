@@ -44,7 +44,7 @@ public class AnvilUtility {
         return paletteSize <= 1 ? 4 : Math.max(4, Integer.SIZE - Integer.numberOfLeadingZeros(paletteSize - 1));
     }
 
-    public static int[] getGlobalChunkPosition(String mcaFileName, int chunkX, int chunkZ) {
+    public static int[] getGlobalChunkPosition(String mcaFileName, int chunkX, int chunkZ) throws NumberFormatException {
         String[] parts = mcaFileName.split("\\.");
         int mcaX = Integer.parseInt(parts[1]);
         int mcaZ = Integer.parseInt(parts[2]);
