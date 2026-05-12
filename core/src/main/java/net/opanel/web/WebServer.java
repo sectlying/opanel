@@ -19,7 +19,6 @@ import net.opanel.controller.openapi.OpenPluginsController;
 import net.opanel.endpoint.InventoryEndpoint;
 import net.opanel.endpoint.PlayersEndpoint;
 import net.opanel.endpoint.TerminalEndpoint;
-import net.opanel.map.MapRenderManager;
 
 import java.util.HashMap;
 
@@ -42,6 +41,9 @@ public class WebServer {
     public void start() throws Exception {
         app = Javalin.create(config -> {
             config.showJavalinBanner = false;
+
+            // HTTP response compression
+            config.compression.gzipOnly(6);
 
             // Gson configuration
             config.jsonMapper(new JavalinGson(new Gson()));
