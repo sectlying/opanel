@@ -40,9 +40,9 @@ pub fn render(tile: &DecodedTile) -> Vec<u8> {
 /// Pick a shade index (0 = brightest, 3 = darkest) by comparing the current
 /// block's height to its northern neighbor (z-1). This is the same rule
 /// vanilla Minecraft map items use.
-fn shade_for(heights: &[u16; TILE_BLOCKS], x: usize, z: usize) -> usize {
+fn shade_for(heights: &[u16; TILE_BLOCKS], x: usize, mut z: usize) -> usize {
     if z == 0 {
-        return 1;
+        z += 1;
     }
     let h = heights[z * TILE_SIDE + x] as i32;
     let h_north = heights[(z - 1) * TILE_SIDE + x] as i32;
