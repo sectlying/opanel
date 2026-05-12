@@ -10,8 +10,8 @@ import {
 import { useMapTiles } from "@/hooks/use-map-tiles";
 
 const TILE_BLOCKS = 16;
-const MIN_ZOOM = 0.25;
-const MAX_ZOOM = 8;
+const MIN_ZOOM = 2;
+const MAX_ZOOM = 10;
 
 // TODO: read the current save name from /api/info (worldName field) once the
 // page lifecycle is wired up; hard-coded for v1.
@@ -128,7 +128,7 @@ export function MapCanvas() {
       onPointerCancel={handlePointerEnd}
       onWheel={handleWheel}
       className="w-full h-full overflow-hidden touch-none cursor-grab active:cursor-grabbing select-none">
-      <canvas ref={canvasRef} className="block w-full h-full"/>
+      <canvas ref={canvasRef} className="block w-full h-full image-pixelated"/>
     </div>
   );
 }

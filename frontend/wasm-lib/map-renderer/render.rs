@@ -51,7 +51,7 @@ fn shade_for(heights: &[u16; TILE_BLOCKS], x: usize, z: usize) -> usize {
         0
     } else if diff == 0 {
         1
-    } else if diff > -3 {
+    } else if diff > -2 {
         2
     } else {
         3

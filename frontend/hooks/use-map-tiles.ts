@@ -28,7 +28,7 @@ export interface UseMapTilesResult {
  */
 export function useMapTiles({ onMessage }: UseMapTilesOptions): UseMapTilesResult {
   const cameraRef = useRef({ x: 0, z: 0 });
-  const zoomRef = useRef(1);
+  const zoomRef = useRef(2);
   const viewportRef = useRef({ width: 0, height: 0 });
   const generationRef = useRef(0);
   const rafRef = useRef<number | null>(null);

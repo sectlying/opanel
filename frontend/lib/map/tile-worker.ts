@@ -31,30 +31,39 @@ function inBounds(viewport: ViewportMessage, x: number, z: number): boolean {
   );
 }
 
-function tileScreenPos(viewport: ViewportMessage, x: number, z: number): [number, number] {
-  if(!canvas) return [0, 0];
-  
+function tileMetrics(viewport: ViewportMessage): { tilePx: number; originX: number; originY: number } {
   const tilePx = viewport.zoom * TILE_BLOCKS;
-  const cx = canvas.width / 2;
-  const cy = canvas.height / 2;
-  return [
-    cx + (x - viewport.camera.x) * tilePx,
-    cy + (z - viewport.camera.z) * tilePx,
-  ];
+  const cx = canvas ? canvas.width / 2 : 0;
+  const cy = canvas ? canvas.height / 2 : 0;
+  const originX = Math.round(cx - viewport.camera.x * tilePx);
+  const originY = Math.round(cy - viewport.camera.z * tilePx);
+  return { tilePx, originX, originY };
 }
 
 function drawSingleTile(viewport: ViewportMessage, x: number, z: number, bitmap: ImageBitmap): void {
   if(!ctx) return;
 
-  const [sx, sy] = tileScreenPos(viewport, x, z);
-  const tilePx = viewport.zoom * TILE_BLOCKS;
-  ctx.drawImage(bitmap, sx, sy, tilePx, tilePx);
+  const { tilePx, originX, originY } = tileMetrics(viewport);
+  const x0 = Math.round(originX + x * tilePx);
+  const y0 = Math.round(originY + z * tilePx);
+  const x1 = Math.round(originX + (x + 1) * tilePx);
+  const y1 = Math.round(originY + (z + 1) * tilePx);
+  ctx.drawImage(bitmap, x0, y0, x1 - x0, y1 - y0);
 }
 
 function renderViewport(viewport: ViewportMessage): void {
   if(!canvas || !ctx) return;
-  if(canvas.width !== viewport.viewportPx.width) canvas.width = viewport.viewportPx.width;
-  if(canvas.height !== viewport.viewportPx.height) canvas.height = viewport.viewportPx.height;
+  
+  let resized = false;
+  if(canvas.width !== viewport.viewportPx.width) {
+    canvas.width = viewport.viewportPx.width;
+    resized = true;
+  }
+  if(canvas.height !== viewport.viewportPx.height) {
+    canvas.height = viewport.viewportPx.height;
+    resized = true;
+  }
+  if(resized) ctx.imageSmoothingEnabled = false;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -81,6 +90,7 @@ async function scheduleFetch(save: string, x: number, z: number): Promise<void> 
   try {
     const bytes = await fetchTile(save, x, z);
     if(!bytes) return;
+
     const rgba = render_tile_rgba(new Uint8Array(bytes));
     const clamped = new Uint8ClampedArray(rgba);
     const imageData = new ImageData(clamped, TILE_BLOCKS, TILE_BLOCKS);

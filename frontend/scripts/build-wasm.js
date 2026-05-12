@@ -43,7 +43,7 @@ if(shouldRebuild()) {
   if(result.status !== 0) {
     process.exit(result.status || 1);
   }
-  console.log("wasm-lib built");
+  console.log("wasm-lib is built successfully");
 } else {
   console.log("wasm-lib up-to-date, skipping build");
 }
