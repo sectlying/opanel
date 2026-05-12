@@ -3,6 +3,7 @@ package net.opanel.bukkit_helper;
 import de.tr7zw.changeme.nbtapi.NBT;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBTCompoundList;
+import net.opanel.annotation.Rewrite;
 import net.opanel.common.OPanelWorldRegion;
 import net.opanel.map.Tile;
 
@@ -152,16 +153,14 @@ public abstract class BaseBukkitWorldRegion implements OPanelWorldRegion {
         try(InputStream stream = readChunkNBT(chunkX, chunkZ)) {
             if(stream == null) return null;
 
-            ReadWriteNBT nbt = NBT.readNBT(stream).getCompound("Level");
-            if(nbt == null) return null;
-
+            ReadWriteNBT nbt = NBT.readNBT(stream);
             ReadWriteNBT heightMaps = nbt.getCompound("Heightmaps");
             if(heightMaps == null) return null;
 
             long[] motionBlockingHeightMap = heightMaps.getLongArray("MOTION_BLOCKING");
-            if(motionBlockingHeightMap == null) return null;
+            if(motionBlockingHeightMap == null || motionBlockingHeightMap.length == 0) return null;
 
-            ReadWriteNBTCompoundList sectionList = nbt.getCompoundList("Sections");
+            ReadWriteNBTCompoundList sectionList = nbt.getCompoundList("sections");
             if(sectionList == null || sectionList.isEmpty()) return null;
             List<Tile.Section> sections = new ArrayList<>();
             for(ReadWriteNBT sectionNbt : sectionList) {
@@ -171,7 +170,7 @@ public abstract class BaseBukkitWorldRegion implements OPanelWorldRegion {
                 }
             }
 
-            return new Tile(chunkX, chunkZ, sections, motionBlockingHeightMap, false);
+            return new Tile(chunkX, chunkZ, sections, motionBlockingHeightMap, true);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -181,7 +180,10 @@ public abstract class BaseBukkitWorldRegion implements OPanelWorldRegion {
     protected Tile.Section readTileSection(ReadWriteNBT sectionNbt) {
         byte y = sectionNbt.getByte("Y");
 
-        ReadWriteNBTCompoundList paletteNbt = sectionNbt.getCompoundList("Palette");
+        ReadWriteNBT blockStates = sectionNbt.getCompound("block_states");
+        if(blockStates == null) return null;
+
+        ReadWriteNBTCompoundList paletteNbt = blockStates.getCompoundList("palette");
         if(paletteNbt == null || paletteNbt.isEmpty()) return null;
         List<String> palette = new ArrayList<>();
         for(ReadWriteNBT item : paletteNbt) {
@@ -191,9 +193,9 @@ public abstract class BaseBukkitWorldRegion implements OPanelWorldRegion {
             }
         }
 
-        long[] blockStates = sectionNbt.getLongArray("BlockStates");
-        if(blockStates == null) return null;
+        long[] blockStatesData = blockStates.getLongArray("data");
+        if((blockStatesData == null || blockStatesData.length == 0) && palette.size() > 1) return null;
 
-        return Tile.createSection(y, palette, blockStates);
+        return Tile.createSection(y, palette, blockStatesData);
     }
 }
