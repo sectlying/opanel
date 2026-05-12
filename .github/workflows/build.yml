@@ -27,6 +27,10 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         cache-dependency-path: ./frontend/package-lock.json
+    - name: Install wasm-pack
+      uses: jetli/wasm-pack-action@v0.4.0
+      with:
+        version: 'latest'
     - run: npm i
     - run: npm run prelaunch
     

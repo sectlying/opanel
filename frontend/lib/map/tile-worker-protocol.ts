@@ -20,11 +20,11 @@ export interface ViewportMessage {
   /** Canvas size in CSS pixels */
   viewportPx: { width: number, height: number }
   tileBounds: {
-    xMin: number,
-    xMax: number,
-    zMin: number,
-    zMax: number,
-  };
+    xMin: number
+    xMax: number
+    zMin: number
+    zMax: number
+  }
 }
 
 export type MainToWorker = InitMessage | SetSaveMessage | ViewportMessage;
