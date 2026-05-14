@@ -50,7 +50,7 @@ const info = [
   },
   {
     name: $("about.info.license"),
-    value: <a href="https://raw.githubusercontent.com/opanel-mc/opanel/refs/heads/main/LICENSE" target="_blank" rel="noopener noreferrer">MPL-2.0</a>,
+    value: <a href="https://raw.githubusercontent.com/opanel-mc/opanel/refs/heads/main/LICENSE" target="_blank" rel="noopener noreferrer">GPL-3.0</a>,
     icon: FileText
   }
 ];
@@ -126,7 +126,7 @@ export default function About() {
           size="icon"
           title={$("about.footer.docs")}
           asChild>
-          <Link href="https://opanel.cn/docs/quick-start.html" target="_blank" rel="noopener noreferrer">
+          <Link href="https://opanel.cn/docs/quick-start" target="_blank" rel="noopener noreferrer">
             <BookText />
           </Link>
         </Button>

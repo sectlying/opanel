@@ -51,11 +51,11 @@ The features of OPanel include:
 
 ## Usage
 
-Read the [Quick Start](https://opanel.cn/docs/quick-start.html) to get started.
+Read the [Quick Start](https://opanel.cn/docs/quick-start) to get started.
 
 ## Contributing
 
-See [Contributing Guidelines](https://opanel.cn/docs/contributing.html) for more information.
+See [Contributing Guidelines](https://opanel.cn/docs/contributing) for more information.
 
 ## Friend Links
 
@@ -67,4 +67,4 @@ See [Contributing Guidelines](https://opanel.cn/docs/contributing.html) for more
 
 ## License
 
-[MPL-2.0](./LICENSE)
+[GPL-3.0](./LICENSE)
