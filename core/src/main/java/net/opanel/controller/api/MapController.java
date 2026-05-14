@@ -5,6 +5,7 @@ import io.javalin.http.Handler;
 import io.javalin.http.HttpStatus;
 import net.opanel.OPanel;
 import net.opanel.controller.BaseController;
+import net.opanel.map.MapRenderManager;
 import net.opanel.utils.Utils;
 
 import java.io.ByteArrayOutputStream;
@@ -12,11 +13,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Stream;
+import java.util.Set;
 
 public class MapController extends BaseController {
     private static final byte[] DATA_BUNDLE_MAGIC = "OOMAP".getBytes(StandardCharsets.US_ASCII);
@@ -32,36 +32,26 @@ public class MapController extends BaseController {
             return;
         }
 
-        Path saveDir = OPanel.MAP_DATA_PATH.resolve(saveName);
-        if(!Files.isDirectory(saveDir)) {
+        if(!Files.isDirectory(OPanel.MAP_DATA_PATH.resolve(saveName))) {
             sendResponse(ctx, HttpStatus.NOT_FOUND, "Save directory not found.");
             return;
         }
 
-        List<Integer[]> tiles = new ArrayList<>();
-        try(Stream<Path> stream = Files.list(saveDir)) {
-            stream.filter(path -> (
-                            path.toString().endsWith(".omap")
-                                    && path.toFile().isFile()
-                    ))
-                    .forEach(path -> {
-                        String fileName = path.getFileName().toString();
-                        String[] parts = fileName.split("\\.");
-                        if(parts.length == 3) {
-                            try {
-                                tiles.add(new Integer[] {
-                                        Integer.parseInt(parts[0]),
-                                        Integer.parseInt(parts[1])
-                                });
-                            } catch (NumberFormatException e) {
-                                //
-                            }
-                        }
-                    });
-        } catch (IOException e) {
-            e.printStackTrace();
-            sendResponse(ctx, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        MapRenderManager manager = plugin.getMapRenderManager();
+        String etag = "\"avail-"+ manager.getIndexVersion(saveName) +"\"";
+        ctx.header("Cache-Control", "private, max-age=5");
+        if(handleEtag(ctx, etag)) {
+            sendResponse(ctx, HttpStatus.NOT_MODIFIED);
             return;
+        }
+
+        Set<Long> coords = manager.getAvailableTileCoords(saveName);
+        List<Integer[]> tiles = new ArrayList<>(coords.size());
+        for(long packed : coords) {
+            tiles.add(new Integer[] {
+                MapRenderManager.unpackX(packed),
+                MapRenderManager.unpackZ(packed)
+            });
         }
 
         HashMap<String, Object> obj = new HashMap<>();
@@ -96,8 +86,7 @@ public class MapController extends BaseController {
             return;
         }
 
-        Path saveDir = OPanel.MAP_DATA_PATH.resolve(saveName);
-        if(!Files.isDirectory(saveDir)) {
+        if(!Files.isDirectory(OPanel.MAP_DATA_PATH.resolve(saveName))) {
             sendResponse(ctx, HttpStatus.NOT_FOUND, "Save directory not found.");
             return;
         }
@@ -107,22 +96,29 @@ public class MapController extends BaseController {
         final int minZ = Math.min(z1, z2);
         final int maxZ = Math.max(z1, z2);
 
+        MapRenderManager manager = plugin.getMapRenderManager();
+        Set<Long> coords = manager.getAvailableTileCoords(saveName);
+
         List<int[]> presentCoords = new ArrayList<>();
         List<byte[]> presentBytes = new ArrayList<>();
         for(int x = minX; x <= maxX; x++) {
             for(int z = minZ; z <= maxZ; z++) {
-                Path tilePath = saveDir.resolve(x +"."+ z +".omap");
-                if(!Files.isRegularFile(tilePath)) continue;
-                try {
-                    byte[] bytes = Files.readAllBytes(tilePath);
-                    presentCoords.add(new int[] { x, z });
-                    presentBytes.add(bytes);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    sendResponse(ctx, HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-                    return;
-                }
+                long packed = MapRenderManager.packCoord(x, z);
+                if(!coords.contains(packed)) continue;
+
+                byte[] bytes = manager.loadTileBytes(saveName, x, z);
+                if(bytes == null) continue;
+
+                presentCoords.add(new int[] { x, z });
+                presentBytes.add(bytes);
             }
+        }
+
+        String etag = "\"tiles-"+ manager.getIndexVersion(saveName) +"-"+ computeBundleHash(presentCoords, presentBytes) +"\"";
+        ctx.header("Cache-Control", "private, max-age=10");
+        if(handleEtag(ctx, etag)) {
+            sendResponse(ctx, HttpStatus.NOT_MODIFIED);
+            return;
         }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -145,4 +141,13 @@ public class MapController extends BaseController {
 
         sendContent(ctx, baos.toByteArray(), ContentType.APPLICATION_OCTET_STREAM);
     };
+
+    private static String computeBundleHash(List<int[]> coords, List<byte[]> bytes) {
+        StringBuilder sb = new StringBuilder(coords.size() * 16);
+        for(int i = 0; i < coords.size(); i++) {
+            int[] c = coords.get(i);
+            sb.append(c[0]).append(',').append(c[1]).append(':').append(bytes.get(i).length).append(';');
+        }
+        return Utils.md5(sb.toString());
+    }
 }

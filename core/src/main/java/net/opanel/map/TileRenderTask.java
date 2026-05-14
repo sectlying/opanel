@@ -56,11 +56,23 @@ public class TileRenderTask implements Runnable {
                 continue;
             }
 
-            try(FileOutputStream fos = new FileOutputStream(saveDir.resolve(pos[0] +"."+ pos[1] +".omap").toFile())) {
-                compressTileToStream(tile, fos);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                compressTileToStream(tile, baos);
             } catch (IOException e) {
                 e.printStackTrace();
+                continue;
             }
+            byte[] bytes = baos.toByteArray();
+
+            try(FileOutputStream fos = new FileOutputStream(saveDir.resolve(pos[0] +"."+ pos[1] +".omap").toFile())) {
+                fos.write(bytes);
+            } catch (IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+
+            plugin.getMapRenderManager().registerRenderedTile(saveName, pos[0], pos[1], bytes);
         }
 
         plugin.logger.info("Finished pre-rendering "+ region.getPath());
