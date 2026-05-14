@@ -14,9 +14,17 @@ fn build_oomap(entries: &[(i32, i32, Vec<u8>)]) -> Vec<u8> {
     out
 }
 
-fn build_omap(palette: &[&str], blocks: &[u16; TILE_BLOCKS], heights: &[u16; TILE_BLOCKS]) -> Vec<u8> {
+fn build_omap(
+    palette: &[&str],
+    blocks: &[u16; TILE_BLOCKS],
+    heights: &[u16; TILE_BLOCKS],
+    biomes_palette: &[&str],
+    biomes: &[u16; TILE_BLOCKS],
+) -> Vec<u8> {
     let mut out = Vec::new();
     out.extend_from_slice(b"OMAP");
+
+    // palette part
     out.extend_from_slice(&(palette.len() as u16).to_be_bytes());
     for id in palette {
         let bytes = id.as_bytes();
@@ -24,19 +32,57 @@ fn build_omap(palette: &[&str], blocks: &[u16; TILE_BLOCKS], heights: &[u16; TIL
         out.extend_from_slice(bytes);
     }
 
-    let block_bits = palette_size_to_bits_size(palette.len());
+    // block data part — min 4 bits, matches Java `paletteSizeToBitsSize(size, 4)`
+    let block_bits = palette_size_to_bits_size(palette.len(), Some(4));
     let packed_blocks = bitpack(blocks, block_bits);
     out.extend_from_slice(&(packed_blocks.len() as u16).to_be_bytes());
     for p in &packed_blocks {
         out.extend_from_slice(&p.to_be_bytes());
     }
 
+    // height map part — fixed 9 bits per value
     let packed_heights = bitpack(heights, 9);
     out.extend_from_slice(&(packed_heights.len() as u16).to_be_bytes());
     for p in &packed_heights {
         out.extend_from_slice(&p.to_be_bytes());
     }
+
+    // biomes palette part
+    out.extend_from_slice(&(biomes_palette.len() as u16).to_be_bytes());
+    for id in biomes_palette {
+        let bytes = id.as_bytes();
+        out.push(bytes.len() as u8);
+        out.extend_from_slice(bytes);
+    }
+
+    // biomes data part — single-biome optimization mirrors Java
+    if biomes_palette.len() <= 1 {
+        out.extend_from_slice(&1u16.to_be_bytes());
+        out.extend_from_slice(&0u64.to_be_bytes());
+    } else {
+        let biome_bits = palette_size_to_bits_size(biomes_palette.len(), None);
+        let packed_biomes = bitpack(biomes, biome_bits);
+        out.extend_from_slice(&(packed_biomes.len() as u16).to_be_bytes());
+        for p in &packed_biomes {
+            out.extend_from_slice(&p.to_be_bytes());
+        }
+    }
+
     out
+}
+
+fn build_omap_simple(
+    palette: &[&str],
+    blocks: &[u16; TILE_BLOCKS],
+    heights: &[u16; TILE_BLOCKS],
+) -> Vec<u8> {
+    build_omap(
+        palette,
+        blocks,
+        heights,
+        &["minecraft:plains"],
+        &[0u16; TILE_BLOCKS],
+    )
 }
 
 #[test]
@@ -53,18 +99,20 @@ fn round_trip_uniform_tile() {
         }
     }
 
-    let bytes = build_omap(&palette, &blocks, &heights);
+    let bytes = build_omap_simple(&palette, &blocks, &heights);
     let tile = decode(&bytes).expect("decode ok");
 
     assert_eq!(tile.palette, vec!["minecraft:air".to_string(), "minecraft:stone".to_string()]);
     assert_eq!(tile.blocks, blocks);
     assert_eq!(tile.heights, heights);
+    assert_eq!(tile.biomes_palette, vec!["minecraft:plains".to_string()]);
+    assert_eq!(tile.biomes, [0u16; TILE_BLOCKS]);
 }
 
 #[test]
 fn round_trip_large_palette_uses_more_bits() {
     // 17 entries → bits = max(4, ceil(log2(17))) = max(4, 5) = 5
-    assert_eq!(palette_size_to_bits_size(17), 5);
+    assert_eq!(palette_size_to_bits_size(17, Some(4)), 5);
     let palette: Vec<String> = (0..17).map(|i| format!("minecraft:b{i}")).collect();
     let palette_refs: Vec<&str> = palette.iter().map(String::as_str).collect();
 
@@ -74,7 +122,7 @@ fn round_trip_large_palette_uses_more_bits() {
     }
     let heights = [42u16; TILE_BLOCKS];
 
-    let bytes = build_omap(&palette_refs, &blocks, &heights);
+    let bytes = build_omap_simple(&palette_refs, &blocks, &heights);
     let tile = decode(&bytes).expect("decode ok");
     assert_eq!(tile.palette.len(), 17);
     assert_eq!(tile.blocks, blocks);
@@ -82,8 +130,49 @@ fn round_trip_large_palette_uses_more_bits() {
 }
 
 #[test]
+fn single_biome_uses_placeholder_long() {
+    // biomes_palette.size() <= 1 → writer emits exactly one zero long; every
+    // block must decode to biome index 0 regardless of the long's payload.
+    let bytes = build_omap_simple(
+        &["minecraft:stone"],
+        &[0u16; TILE_BLOCKS],
+        &[64u16; TILE_BLOCKS],
+    );
+    let tile = decode(&bytes).expect("decode ok");
+    assert_eq!(tile.biomes_palette, vec!["minecraft:plains".to_string()]);
+    assert_eq!(tile.biomes, [0u16; TILE_BLOCKS]);
+}
+
+#[test]
+fn multi_biome_packs_at_native_bits() {
+    // 2 biomes → 1 bit/value (no 4-bit floor for biomes). 256 values * 1 bit
+    // packs into 4 longs.
+    assert_eq!(palette_size_to_bits_size(2, None), 1);
+
+    let biomes_palette = ["minecraft:plains", "minecraft:ocean"];
+    let mut biomes = [0u16; TILE_BLOCKS];
+    for i in 0..TILE_BLOCKS {
+        biomes[i] = (i % 2) as u16;
+    }
+
+    let bytes = build_omap(
+        &["minecraft:stone"],
+        &[0u16; TILE_BLOCKS],
+        &[64u16; TILE_BLOCKS],
+        &biomes_palette,
+        &biomes,
+    );
+    let tile = decode(&bytes).expect("decode ok");
+    assert_eq!(
+        tile.biomes_palette,
+        vec!["minecraft:plains".to_string(), "minecraft:ocean".to_string()],
+    );
+    assert_eq!(tile.biomes, biomes);
+}
+
+#[test]
 fn bad_magic_errors() {
-    let mut bytes = build_omap(
+    let mut bytes = build_omap_simple(
         &["minecraft:air"],
         &[0u16; TILE_BLOCKS],
         &[0u16; TILE_BLOCKS],
@@ -97,12 +186,12 @@ fn bad_magic_errors() {
 
 #[test]
 fn truncated_input_errors() {
-    let bytes = build_omap(
+    let bytes = build_omap_simple(
         &["minecraft:air"],
         &[0u16; TILE_BLOCKS],
         &[0u16; TILE_BLOCKS],
     );
-    // chop off the last height-data long
+    // chop off the trailing biome placeholder long
     let truncated = &bytes[..bytes.len() - 8];
     match decode(truncated) {
         Err(DecodeError::Truncated) => {}
@@ -127,11 +216,11 @@ fn bundle_round_trip_multiple_tiles() {
         blocks_a[i] = (i % 2) as u16;
         heights_a[i] = i as u16;
     }
-    let omap_a = build_omap(&palette, &blocks_a, &heights_a);
+    let omap_a = build_omap_simple(&palette, &blocks_a, &heights_a);
 
     let blocks_b = [1u16; TILE_BLOCKS];
     let heights_b = [256u16; TILE_BLOCKS];
-    let omap_b = build_omap(&palette, &blocks_b, &heights_b);
+    let omap_b = build_omap_simple(&palette, &blocks_b, &heights_b);
 
     let bytes = build_oomap(&[
         (-3, 7, omap_a.clone()),
@@ -164,7 +253,7 @@ fn bundle_bad_magic_errors() {
 
 #[test]
 fn bundle_truncated_errors() {
-    let omap = build_omap(
+    let omap = build_omap_simple(
         &["minecraft:air"],
         &[0u16; TILE_BLOCKS],
         &[0u16; TILE_BLOCKS],
@@ -180,11 +269,24 @@ fn bundle_truncated_errors() {
 
 #[test]
 fn palette_size_to_bits_size_matches_java() {
-    assert_eq!(palette_size_to_bits_size(0), 4);
-    assert_eq!(palette_size_to_bits_size(1), 4);
-    assert_eq!(palette_size_to_bits_size(2), 4);
-    assert_eq!(palette_size_to_bits_size(16), 4);
-    assert_eq!(palette_size_to_bits_size(17), 5);
-    assert_eq!(palette_size_to_bits_size(32), 5);
-    assert_eq!(palette_size_to_bits_size(33), 6);
+    // 2-arg form (min 4 bits) — used for block palettes, mirrors
+    // `AnvilUtility.paletteSizeToBitsSize(size, 4)`.
+    assert_eq!(palette_size_to_bits_size(0, Some(4)), 4);
+    assert_eq!(palette_size_to_bits_size(1, Some(4)), 4);
+    assert_eq!(palette_size_to_bits_size(2, Some(4)), 4);
+    assert_eq!(palette_size_to_bits_size(16, Some(4)), 4);
+    assert_eq!(palette_size_to_bits_size(17, Some(4)), 5);
+    assert_eq!(palette_size_to_bits_size(32, Some(4)), 5);
+    assert_eq!(palette_size_to_bits_size(33, Some(4)), 6);
+
+    // 1-arg form (no floor) — used for biome palettes, mirrors
+    // `AnvilUtility.paletteSizeToBitsSize(size)`.
+    assert_eq!(palette_size_to_bits_size(2, None), 1);
+    assert_eq!(palette_size_to_bits_size(3, None), 2);
+    assert_eq!(palette_size_to_bits_size(4, None), 2);
+    assert_eq!(palette_size_to_bits_size(5, None), 3);
+    assert_eq!(palette_size_to_bits_size(8, None), 3);
+    assert_eq!(palette_size_to_bits_size(9, None), 4);
+    assert_eq!(palette_size_to_bits_size(16, None), 4);
+    assert_eq!(palette_size_to_bits_size(17, None), 5);
 }
