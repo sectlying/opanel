@@ -12,18 +12,6 @@ const wasmOut = path.join(crateDir, "pkg", "wasm_lib_bg.wasm");
 
 const IGNORED = new Set(["target", "pkg"]);
 
-function ensureWasmPack() {
-  const probe = spawnSync("wasm-pack", ["--version"], { stdio: "ignore", shell: true });
-  if(probe.status === 0) return;
-
-  console.error("Error: `wasm-pack` not found in PATH.");
-  console.error("Install it with one of:");
-  console.error("- cargo install wasm-pack --locked");
-  console.error("- cargo binstall wasm-pack");
-  console.error("- https://wasm-bindgen.github.io/wasm-pack/installer/");
-  process.exit(1);
-}
-
 function newestMtimeIn(dir) {
   let newest = 0;
   for(const ent of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -48,7 +36,6 @@ function shouldRebuild() {
 
 function buildWasm() {
   if(shouldRebuild()) {
-    ensureWasmPack();
     console.log("Building wasm-lib...");
 
     const result = spawnSync(
