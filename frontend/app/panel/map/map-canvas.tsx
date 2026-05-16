@@ -3,6 +3,7 @@
 import type { MainToWorker, RenderSettings, WorkerToMain } from "@/lib/map/tile-worker-protocol";
 import {
   forwardRef,
+  useCallback,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -45,6 +46,9 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
   const workerRef = useRef<Worker | null>(null);
   const dragRef = useRef({ active: false, lastX: 0, lastY: 0 });
   const settingsRef = useRef(settings);
+  const saveRef = useLatestRef(save);
+  const onFpsChangeRef = useLatestRef(onFpsChange);
+  const onTilesLoadedChangeRef = useLatestRef(onTilesLoadedChange);
   const onResizeRef = useLatestRef(onResize);
 
   const { cameraRef, zoomRef, postViewport, setViewportSize } = useMapTiles({
@@ -120,56 +124,68 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
     applyZoom(e.deltaY > 0 ? 0.9 : 1.1, px, py);
   };
 
+  // `transferControlToOffscreen` can only be called once per canvas element.
+  // Initialize the worker exactly once per mount and route subsequent state
+  // changes (save, settings) through dedicated postMessage effects.
+  const initWorker = useCallback(async () => {
+    if(workerRef.current || !canvasRef.current) return;
+
+    const wasmUrl = new URL("../../../wasm-lib/pkg/wasm_lib_bg.wasm", import.meta.url);
+    const wasmResp = await fetch(wasmUrl);
+    const wasmBuffer = await wasmResp.arrayBuffer();
+    // return early if one of workerRef and canvasRef is changed while awaiting
+    if(workerRef.current || !canvasRef.current) return;
+
+    const offscreen = canvasRef.current.transferControlToOffscreen();
+
+    const worker = new Worker(
+      new URL("../../../lib/map/tile-worker.ts", import.meta.url),
+      { type: "module" },
+    );
+    workerRef.current = worker;
+
+    worker.onmessage = (e: MessageEvent<WorkerToMain>) => {
+      switch(e.data.type) {
+        case "fps":
+          onFpsChangeRef.current?.(e.data.value);
+          return;
+        case "tilesLoaded":
+          onTilesLoadedChangeRef.current?.(e.data.value);
+          return;
+      }
+    };
+
+    worker.postMessage({
+      type: "init",
+      canvas: offscreen,
+      saveName: saveRef.current,
+      wasmModule: wasmBuffer,
+      settings: settingsRef.current,
+    }, [offscreen, wasmBuffer]);
+
+    if(settingsRef.current?.debugMode) {
+      worker.postMessage({ type: "setFpsReporting", enabled: true } satisfies MainToWorker);
+    }
+  }, [saveRef, onFpsChangeRef, onTilesLoadedChangeRef]);
+
   useImperativeHandle(ref, () => ({
     zoomIn: () => applyZoom(1.1, 0, 0),
     zoomOut: () => applyZoom(0.9, 0, 0),
   }));
 
   useEffect(() => {
-    if(workerRef.current || !canvasRef.current) return;
-
-    const wasmUrl = new URL("../../../wasm-lib/pkg/wasm_lib_bg.wasm", import.meta.url);
-
-    const initWorker = async () => {
-      const worker = new Worker(
-        new URL("../../../lib/map/tile-worker.ts", import.meta.url),
-        { type: "module" },
-      );
-      workerRef.current = worker;
-
-      worker.onmessage = (e: MessageEvent<WorkerToMain>) => {
-        switch(e.data.type) {
-          case "fps":
-            onFpsChange?.(e.data.value);
-            return;
-          case "tilesLoaded":
-            onTilesLoadedChange?.(e.data.value);
-            return;
-        }
-      };
-
-      const offscreen = canvasRef.current!.transferControlToOffscreen();
-      const wasmResp = await fetch(wasmUrl);
-      const wasmBuffer = await wasmResp.arrayBuffer();
-      const init: MainToWorker = {
-        type: "init",
-        canvas: offscreen,
-        saveName: save,
-        wasmModule: wasmBuffer,
-        settings: settingsRef.current,
-      };
-      worker.postMessage(init, [offscreen, wasmBuffer]);
-      if(settingsRef.current?.debugMode) {
-        worker.postMessage({ type: "setFpsReporting", enabled: true } satisfies MainToWorker);
-      }
-    };
     initWorker();
 
     return () => {
       workerRef.current?.terminate();
       workerRef.current = null;
     };
-  }, [save, onFpsChange, onTilesLoadedChange]);
+  }, [initWorker]);
+
+  useEffect(() => {
+    if(!workerRef.current) return;
+    workerRef.current.postMessage({ type: "setSave", saveName: save } satisfies MainToWorker);
+  }, [save]);
 
   useEffect(() => {
     if(!workerRef.current) return;

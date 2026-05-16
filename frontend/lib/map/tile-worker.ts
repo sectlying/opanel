@@ -82,6 +82,15 @@ function stampTileIntoMacro(x: number, z: number, bitmap: ImageBitmap): void {
   mctx.drawImage(bitmap, localX * TILE_BLOCKS, localZ * TILE_BLOCKS);
 }
 
+async function reloadAvailableTiles(save: string): Promise<void> {
+  const tiles = await fetchAvailableTiles(save);
+  // Drop the result if the user switched saves while we were fetching.
+  if(save !== saveName) return;
+  
+  availableTiles = new Set(tiles.map(([x, z]) => getTileKey(save, x, z)));
+  if(currentViewport) renderViewport(currentViewport);
+}
+
 function reportFps(): void {
   const cutoff = performance.now() - FPS_WINDOW_MS;
   while(frameTimes.length > 0 && frameTimes[0] < cutoff) {
@@ -204,13 +213,13 @@ self.onmessage = async (e: MessageEvent<MainToWorker>) => {
       initSync({ module: new Uint8Array(msg.wasmModule) });
       init_panic_hook();
 
-      const tiles = await fetchAvailableTiles(saveName);
-      availableTiles = new Set(tiles.map(([x, z]) => getTileKey(saveName, x, z)));
-      if(currentViewport) renderViewport(currentViewport);
+      await reloadAvailableTiles(saveName);
       return;
     case "setSave":
+      if(saveName === msg.saveName) return;
+      
       saveName = msg.saveName;
-      if(currentViewport) renderViewport(currentViewport);
+      await reloadAvailableTiles(saveName);
       return;
     case "setSettings":
       settings = msg.settings;

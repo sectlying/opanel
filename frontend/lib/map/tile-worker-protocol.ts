@@ -50,8 +50,6 @@ export interface ViewportMessage {
   interactive: boolean
 }
 
-export type MainToWorker = InitMessage | SetSaveMessage | SetSettingsMessage | SetFpsReportingMessage | ViewportMessage;
-
 export interface FpsMessage {
   type: "fps"
   value: number
@@ -61,5 +59,7 @@ export interface TilesLoadedMessage {
   type: "tilesLoaded"
   value: number
 }
+
+export type MainToWorker = InitMessage | SetSaveMessage | SetSettingsMessage | SetFpsReportingMessage | ViewportMessage;
 
 export type WorkerToMain = FpsMessage | TilesLoadedMessage;
