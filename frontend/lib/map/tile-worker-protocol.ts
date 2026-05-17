@@ -4,31 +4,7 @@ export interface RenderSettings {
   debugMode: boolean
 }
 
-export interface InitMessage {
-  type: "init"
-  canvas: OffscreenCanvas
-  saveName: string
-  wasmModule: ArrayBuffer
-  settings?: RenderSettings
-}
-
-export interface SetSaveMessage {
-  type: "setSave"
-  saveName: string
-}
-
-export interface SetSettingsMessage {
-  type: "setSettings"
-  settings: RenderSettings
-}
-
-export interface SetFpsReportingMessage {
-  type: "setFpsReporting"
-  enabled: boolean
-}
-
-export interface ViewportMessage {
-  type: "viewport"
+export interface Viewport {
   generation: number
   /** Chunk-space, fractional */
   camera: { x: number, z: number }
@@ -42,12 +18,47 @@ export interface ViewportMessage {
     zMin: number
     zMax: number
   }
-  /**
-   * True while the user is mid-interaction (e.g. dragging). The worker redraws
-   * cached tiles but skips issuing fetches. A final `interactive=false`
-   * message at drag end triggers the actual fetch.
-   */
-  interactive: boolean
+}
+
+export interface InitMessage {
+  type: "init"
+  canvas: OffscreenCanvas
+  saveName: string
+  wasmModule: ArrayBuffer
+  settings?: RenderSettings
+}
+
+export interface SetSettingsMessage {
+  type: "setSettings"
+  settings: RenderSettings
+}
+
+export interface SetFpsReportingMessage {
+  type: "setFpsReporting"
+  enabled: boolean
+}
+
+/**
+ * Pure render update. Sent during ongoing user interaction (drag, zoom in
+ * progress). Worker re-renders cached tiles but does NOT fetch new tiles.
+ */
+export interface ViewportMessage {
+  type: "viewport"
+  viewport: Viewport
+}
+
+/**
+ * Render + fetch. Sent at drag release, zoom step, and resize. Worker
+ * re-renders cached tiles AND issues a fetch for any uncached tiles in the
+ * given viewport bounds.
+ */
+export interface RequestTilesMessage {
+  type: "requestTiles"
+  viewport: Viewport
+}
+
+export interface ReadyMessage {
+  type: "ready"
 }
 
 export interface FpsMessage {
@@ -60,6 +71,11 @@ export interface TilesLoadedMessage {
   value: number
 }
 
-export type MainToWorker = InitMessage | SetSaveMessage | SetSettingsMessage | SetFpsReportingMessage | ViewportMessage;
+export type MainToWorker =
+  | InitMessage
+  | SetSettingsMessage
+  | SetFpsReportingMessage
+  | ViewportMessage
+  | RequestTilesMessage;
 
-export type WorkerToMain = FpsMessage | TilesLoadedMessage;
+export type WorkerToMain = ReadyMessage | FpsMessage | TilesLoadedMessage;

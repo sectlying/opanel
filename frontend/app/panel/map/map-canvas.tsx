@@ -46,12 +46,11 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
   const workerRef = useRef<Worker | null>(null);
   const dragRef = useRef({ active: false, lastX: 0, lastY: 0 });
   const settingsRef = useRef(settings);
-  const saveRef = useLatestRef(save);
   const onFpsChangeRef = useLatestRef(onFpsChange);
   const onTilesLoadedChangeRef = useLatestRef(onTilesLoadedChange);
   const onResizeRef = useLatestRef(onResize);
 
-  const { cameraRef, zoomRef, postViewport, setViewportSize } = useMapTiles({
+  const { viewportRef, postViewport, postRequestTiles, setViewportSize } = useMapTiles({
     postWorkerMessage: (msg) => workerRef.current?.postMessage(msg),
   });
 
@@ -68,8 +67,8 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
     const rect = e.currentTarget.getBoundingClientRect();
     const px = e.clientX - rect.left - rect.width / 2;
     const py = e.clientY - rect.top - rect.height / 2;
-    const blockX = cameraRef.current.x * TILE_BLOCKS + px / zoomRef.current;
-    const blockZ = cameraRef.current.z * TILE_BLOCKS + py / zoomRef.current;
+    const blockX = viewportRef.current.camera.x * TILE_BLOCKS + px / viewportRef.current.zoom;
+    const blockZ = viewportRef.current.camera.z * TILE_BLOCKS + py / viewportRef.current.zoom;
     onCoordChange({ x: blockX, z: blockZ });
   };
 
@@ -79,10 +78,10 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
       const dy = e.clientY - dragRef.current.lastY;
       dragRef.current.lastX = e.clientX;
       dragRef.current.lastY = e.clientY;
-      const tilePx = zoomRef.current * TILE_BLOCKS;
-      cameraRef.current.x -= dx / tilePx;
-      cameraRef.current.z -= dy / tilePx;
-      postViewport({ interactive: true });
+      const tilePx = viewportRef.current.zoom * TILE_BLOCKS;
+      viewportRef.current.camera.x -= dx / tilePx;
+      viewportRef.current.camera.z -= dy / tilePx;
+      postViewport();
     }
 
     reportCoord(e);
@@ -98,21 +97,21 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
     if(e.currentTarget.hasPointerCapture(e.pointerId)) {
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
-    if(wasDragging) postViewport();
+    if(wasDragging) postRequestTiles();
   };
 
   const applyZoom = (factor: number, anchorPx: number, anchorPy: number) => {
-    const oldZoom = zoomRef.current;
+    const oldZoom = viewportRef.current.zoom;
     const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, oldZoom * factor));
     if(newZoom === oldZoom) return;
 
     // Keep the world point under the anchor stationary on screen.
     const oldTilePx = oldZoom * TILE_BLOCKS;
     const newTilePx = newZoom * TILE_BLOCKS;
-    cameraRef.current.x += anchorPx / oldTilePx - anchorPx / newTilePx;
-    cameraRef.current.z += anchorPy / oldTilePx - anchorPy / newTilePx;
-    zoomRef.current = newZoom;
-    postViewport();
+    viewportRef.current.camera.x += anchorPx / oldTilePx - anchorPx / newTilePx;
+    viewportRef.current.camera.z += anchorPy / oldTilePx - anchorPy / newTilePx;
+    viewportRef.current.zoom = newZoom;
+    postRequestTiles();
 
     onZoomChange?.(newZoom);
   };
@@ -125,8 +124,9 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
   };
 
   // `transferControlToOffscreen` can only be called once per canvas element.
-  // Initialize the worker exactly once per mount and route subsequent state
-  // changes (save, settings) through dedicated postMessage effects.
+  // Initialize the worker exactly once per mount. Save changes remount the
+  // whole component via `key={save}` in the parent, which gives us a fresh
+  // canvas and a fresh worker. Settings changes go through a postMessage.
   const initWorker = useCallback(async () => {
     if(workerRef.current || !canvasRef.current) return;
 
@@ -146,6 +146,10 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
 
     worker.onmessage = (e: MessageEvent<WorkerToMain>) => {
       switch(e.data.type) {
+        case "ready":
+          // First tiles fetch
+          postRequestTiles();
+          return;
         case "fps":
           onFpsChangeRef.current?.(e.data.value);
           return;
@@ -158,7 +162,7 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
     worker.postMessage({
       type: "init",
       canvas: offscreen,
-      saveName: saveRef.current,
+      saveName: save,
       wasmModule: wasmBuffer,
       settings: settingsRef.current,
     }, [offscreen, wasmBuffer]);
@@ -166,7 +170,7 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
     if(settingsRef.current?.debugMode) {
       worker.postMessage({ type: "setFpsReporting", enabled: true } satisfies MainToWorker);
     }
-  }, [saveRef, onFpsChangeRef, onTilesLoadedChangeRef]);
+  }, [save, onFpsChangeRef, onTilesLoadedChangeRef, postRequestTiles]);
 
   useImperativeHandle(ref, () => ({
     zoomIn: () => applyZoom(1.1, 0, 0),
@@ -181,11 +185,6 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
       workerRef.current = null;
     };
   }, [initWorker]);
-
-  useEffect(() => {
-    if(!workerRef.current) return;
-    workerRef.current.postMessage({ type: "setSave", saveName: save } satisfies MainToWorker);
-  }, [save]);
 
   useEffect(() => {
     if(!workerRef.current) return;

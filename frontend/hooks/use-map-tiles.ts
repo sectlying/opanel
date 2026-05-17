@@ -1,86 +1,76 @@
-import type { MainToWorker } from "@/lib/map/tile-worker-protocol";
+import type { MainToWorker, Viewport } from "@/lib/map/tile-worker-protocol";
 import { useCallback, useEffect, useRef } from "react";
 import { useLatestRef } from "./use-latest-ref";
 
 const TILE_BLOCKS = 16;
+export const DEFAULT_ZOOM = 2;
 
 export interface UseMapTilesOptions {
   postWorkerMessage: (msg: MainToWorker) => void;
 }
 
-export interface UseMapTilesResult {
-  /** Center of the visible area, in fractional chunk coordinates. */
-  cameraRef: React.RefObject<{ x: number, z: number }>;
-  /** Pixels per block (1 = 16 px per chunk). */
-  zoomRef: React.RefObject<number>;
-  /** Canvas size in CSS pixels (kept in sync via ResizeObserver). */
-  viewportRef: React.RefObject<{ width: number, height: number }>;
-  /**
-   * Schedule a viewport postMessage to the worker, coalesced via rAF.
-   * Pass `{ interactive: true }` during drag to make the worker skip fetches
-   * until the next non-interactive call.
-   */
-  postViewport: (opts?: { interactive?: boolean }) => void;
-  /** Update viewport size and trigger a viewport postMessage. */
-  setViewportSize: (width: number, height: number) => void;
-}
-
-export const DEFAULT_ZOOM = 2;
+type ViewportUpdateKind = "viewport" | "requestTiles";
 
 /**
- * Pure state container + rAF-coalesced viewport dispatcher for the map.
- * Owns camera / zoom / viewport refs but never re-renders the React tree —
- * the consumer mutates refs directly during pointer events and calls
- * `postViewport()` to push the latest viewport to the worker.
+ * Pure state container + rAF-coalesced dispatcher for map viewport updates.
+ * Owns the canonical `Viewport` ref but never re-renders the React tree —
+ * the consumer mutates the ref directly during pointer events and calls
+ * `postViewport()` (render only) or `postRequestTiles()` (render + fetch).
  */
-export function useMapTiles({ postWorkerMessage }: UseMapTilesOptions): UseMapTilesResult {
-  const cameraRef = useRef({ x: 0, z: 0 });
-  const zoomRef = useRef(DEFAULT_ZOOM);
-  const viewportRef = useRef({ width: 0, height: 0 });
-  const generationRef = useRef(0);
+export function useMapTiles({ postWorkerMessage }: UseMapTilesOptions) {
+  const viewportRef = useRef<Viewport>({
+    generation: 0,
+    camera: { x: 0, z: 0 },
+    zoom: DEFAULT_ZOOM,
+    viewportPx: { width: 0, height: 0 },
+    tileBounds: { xMin: 0, xMax: 0, zMin: 0, zMax: 0 },
+  });
   const rafRef = useRef<number | null>(null);
-  const interactiveRef = useRef(false);
+  // The pending message kind for the next rAF. `requestTiles` is the stronger
+  // commitment (it implies a render too), so it always wins coalescing.
+  const pendingKindRef = useRef<ViewportUpdateKind | null>(null);
   const postWorkerMessageRef = useLatestRef(postWorkerMessage);
 
-  const postViewport = useCallback((options?: { interactive?: boolean }) => {
-    interactiveRef.current = options?.interactive ?? false;
-
+  const schedulePost = useCallback((kind: ViewportUpdateKind) => {
+    if(pendingKindRef.current !== "requestTiles") {
+      pendingKindRef.current = kind;
+    }
     if(rafRef.current !== null) return;
 
-    // Use rAF to coalesce multiple rapid calls
-    // and avoid posting too many viewport updates during fast drags or zooms.
     rafRef.current = requestAnimationFrame(() => {
       rafRef.current = null;
+      const k = pendingKindRef.current;
+      pendingKindRef.current = null;
+      if(!k) return;
 
-      const { width, height } = viewportRef.current;
+      const { width, height } = viewportRef.current.viewportPx;
       if(width === 0 || height === 0) return;
 
-      const tilePx = zoomRef.current * TILE_BLOCKS;
-      const halfW = (width / 2) / tilePx;
-      const halfH = (height / 2) / tilePx;
+      const viewport = viewportRef.current;
+      const tilePx = viewport.zoom * TILE_BLOCKS;
+      const halfW = (viewport.viewportPx.width / 2) / tilePx;
+      const halfH = (viewport.viewportPx.height / 2) / tilePx;
+      viewport.tileBounds.xMin = Math.floor(viewport.camera.x - halfW);
+      viewport.tileBounds.xMax = Math.ceil(viewport.camera.x + halfW);
+      viewport.tileBounds.zMin = Math.floor(viewport.camera.z - halfH);
+      viewport.tileBounds.zMax = Math.ceil(viewport.camera.z + halfH);
+      viewport.generation += 1;
 
-      generationRef.current += 1;
-      postWorkerMessageRef.current({
-        type: "viewport",
-        generation: generationRef.current,
-        camera: { x: cameraRef.current.x, z: cameraRef.current.z },
-        zoom: zoomRef.current,
-        viewportPx: { width, height },
-        tileBounds: {
-          xMin: Math.floor(cameraRef.current.x - halfW),
-          xMax: Math.ceil(cameraRef.current.x + halfW),
-          zMin: Math.floor(cameraRef.current.z - halfH),
-          zMax: Math.ceil(cameraRef.current.z + halfH),
-        },
-        interactive: interactiveRef.current,
-      });
+      postWorkerMessageRef.current(
+        k === "viewport"
+        ? { type: "viewport", viewport: viewportRef.current }
+        : { type: "requestTiles", viewport: viewportRef.current }
+      );
     });
   }, [postWorkerMessageRef]);
 
+  const postViewport = useCallback(() => schedulePost("viewport"), [schedulePost]);
+  const postRequestTiles = useCallback(() => schedulePost("requestTiles"), [schedulePost]);
+
   const setViewportSize = useCallback((width: number, height: number) => {
-    viewportRef.current = { width, height };
-    postViewport();
-  }, [postViewport]);
+    viewportRef.current.viewportPx = { width, height };
+    postRequestTiles();
+  }, [postRequestTiles]);
 
   // eslint-disable-next-line arrow-body-style
   useEffect(() => {
@@ -89,5 +79,5 @@ export function useMapTiles({ postWorkerMessage }: UseMapTilesOptions): UseMapTi
     };
   }, []);
 
-  return { cameraRef, zoomRef, viewportRef, postViewport, setViewportSize };
+  return { viewportRef, postViewport, postRequestTiles, setViewportSize };
 }

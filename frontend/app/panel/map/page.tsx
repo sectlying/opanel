@@ -148,7 +148,10 @@ export default function ServerMap() {
           <span className={cn("ml-auto px-2 text-xs", googleSansCode.className)}>
             {coord ? `${coord.x.toFixed(0)} ${coord.z.toFixed(0)}` : ""}
           </span>
-          <MapSettingsPopover settings={settings} onSettingsChange={handleSettingsChange} asChild>
+          <MapSettingsPopover
+            settings={settings}
+            onSettingsChange={handleSettingsChange}
+            asChild>
             <Button variant="ghost" size="icon" className="cursor-pointer">
               <Settings />
             </Button>
