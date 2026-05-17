@@ -104,6 +104,7 @@ public interface OPanelServer {
     List<OPanelPlugin> getPlugins();
     void togglePlugin(String fileName, boolean enabled) throws IOException;
     void deletePlugin(String fileName) throws IOException;
+    OPanelChunkAccessor getChunkAccessor();
 
     static String getPropertiesContent() throws IOException {
         if(!Files.exists(serverPropertiesPath)) {

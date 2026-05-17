@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.CommandNode;
 import net.opanel.annotation.Rewrite;
 import net.opanel.bukkit_helper.BaseBukkitServer;
+import net.opanel.bukkit_helper.BaseBukkitChunkAccessor;
 import net.opanel.bukkit_helper.utils.BukkitUtils;
 import net.opanel.common.*;
 import net.opanel.common.features.BukkitConfigFeature;
@@ -26,8 +27,12 @@ import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
 public class SpigotServer extends BaseBukkitServer implements OPanelServer, CodeOfConductFeature, BukkitConfigFeature {
+    private final SpigotChunkAccessor chunkAccessor;
+
     public SpigotServer(Main plugin, Server server) {
         super(plugin, server);
+
+        this.chunkAccessor = new SpigotChunkAccessor(plugin);
     }
 
     @Override
@@ -265,5 +270,10 @@ public class SpigotServer extends BaseBukkitServer implements OPanelServer, Code
             FileOpsHelperApi.scheduleDelete(List.of(filePath.toString()));
             throw new ActLaterException();
         }
+    }
+
+    @Override
+    public OPanelChunkAccessor getChunkAccessor() {
+        return chunkAccessor;
     }
 }

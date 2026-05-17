@@ -1,8 +1,13 @@
 package net.opanel.map;
 
 import net.opanel.OPanel;
+import net.opanel.common.OPanelChunkAccessor;
 import net.opanel.common.OPanelSave;
+import net.opanel.common.OPanelServer;
 import net.opanel.common.OPanelWorldRegion;
+import net.opanel.event.EventManager;
+import net.opanel.event.EventType;
+import net.opanel.event.OPanelChunkDirtyEvent;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,9 +21,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
@@ -26,15 +33,27 @@ public class MapRenderManager {
     private static final String OTILES_SUFFIX = ".otiles";
     private static final String OTILES_TMP_SUFFIX = ".otiles.tmp";
 
+    private static final long FLUSH_INTERVAL_MS = 5000L;
+    private static final int MAX_CHUNKS_PER_FLUSH = 64;
+    private static final long BUNDLE_WRITE_DEBOUNCE_MS = 5000L;
+
     private final OPanel plugin;
     private final ExecutorService executor = Executors.newFixedThreadPool(
         Runtime.getRuntime().availableProcessors()
     );
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(task -> {
+        Thread thread = new Thread(task, "opanel-map-scheduler");
+        thread.setDaemon(true);
+        return thread;
+    });
     private final Map<String, List<OPanelWorldRegion>> saveRegionMap = new HashMap<>();
 
     private final Map<String, Set<Long>> availableTilesIndex = new ConcurrentHashMap<>();
     private final Map<String, Map<Long, byte[]>> tileBytesCache = new ConcurrentHashMap<>();
     private final Map<String, AtomicLong> indexVersion = new ConcurrentHashMap<>();
+
+    private final DirtyChunkTracker dirtyChunkTracker = new DirtyChunkTracker();
+    private final Map<String, ScheduledFuture<?>> pendingBundleWrite = new ConcurrentHashMap<>();
 
     public MapRenderManager(OPanel plugin) {
         this.plugin = plugin;
@@ -65,9 +84,60 @@ public class MapRenderManager {
             if(bundleNames.contains(saveName)) {
                 executor.execute(() -> loadTileBundle(saveName));
             } else {
-                renderSave(saveName, entry.getValue());
+                renderSave(saveName, entry.getValue())
+                    .thenRunAsync(() -> writeTileBundle(saveName), executor);
             }
         }
+
+        scheduler.scheduleWithFixedDelay(
+                this::flushDirtyChunks,
+                FLUSH_INTERVAL_MS,
+                FLUSH_INTERVAL_MS,
+                TimeUnit.MILLISECONDS
+        );
+
+        EventManager.get().on(EventType.CHUNK_DIRTY, (OPanelChunkDirtyEvent e) -> {
+            dirtyChunkTracker.markDirty(e.getSaveName(), e.getChunkX(), e.getChunkZ());
+        });
+    }
+
+    private void flushDirtyChunks() {
+        OPanelServer server = plugin.getServer();
+        OPanelChunkAccessor accessor = server.getChunkAccessor();
+        if(accessor == null) return;
+
+        for(String saveName : dirtyChunkTracker.getSaveNames()) {
+            List<Long> batch = dirtyChunkTracker.drain(saveName, MAX_CHUNKS_PER_FLUSH);
+            if(batch.isEmpty()) continue;
+
+            for(long packed : batch) {
+                final int chunkX = unpackX(packed);
+                final int chunkZ = unpackZ(packed);
+                final Tile tile = accessor.readLiveTile(saveName, chunkX, chunkZ);
+                if(tile == null) continue;
+
+                renderTile(saveName, chunkX, chunkZ, tile)
+                    .thenRunAsync(() -> scheduleBundleWrite(saveName), executor);
+            }
+        }
+    }
+
+    /**
+     * Coalesce bundle writes for a save into at most one write every
+     * {@link #BUNDLE_WRITE_DEBOUNCE_MS}. Multiple calls within the window
+     * collapse to a single delayed write.
+     */
+    public void scheduleBundleWrite(String saveName) {
+        pendingBundleWrite.computeIfAbsent(saveName, key ->
+            scheduler.schedule(() -> {
+                pendingBundleWrite.remove(key);
+                try {
+                    writeTileBundle(key);
+                } catch (Throwable e) {
+                    plugin.logger.warn("Failed to write tile bundle for save '"+ key +"': "+ e.getMessage());
+                }
+            }, BUNDLE_WRITE_DEBOUNCE_MS, TimeUnit.MILLISECONDS)
+        );
     }
 
     private Set<String> getTileBundleNames() {
@@ -115,10 +185,7 @@ public class MapRenderManager {
 
     private void writeTileBundle(String saveName) {
         Map<Long, byte[]> bytesMap = tileBytesCache.get(saveName);
-        if(bytesMap == null || bytesMap.isEmpty()) {
-            plugin.logger.info("No tiles to persist for save '"+ saveName +"'");
-            return;
-        }
+        if(bytesMap == null || bytesMap.isEmpty()) return;
 
         Map<Long, byte[]> snapshot = new HashMap<>(bytesMap);
         try {
@@ -127,24 +194,23 @@ public class MapRenderManager {
             Path dst = OPanel.MAP_DATA_PATH.resolve(saveName + OTILES_SUFFIX);
             Files.write(tmp, payload);
             Files.move(tmp, dst, StandardCopyOption.REPLACE_EXISTING);
-            plugin.logger.info("Wrote "+ snapshot.size() +" tiles for save '"+ saveName +"'");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void renderSave(String saveName, List<OPanelWorldRegion> regions) {
-        if(regions.isEmpty()) return;
+    public CompletableFuture<?> renderSave(String saveName, List<OPanelWorldRegion> regions) {
+        if(regions.isEmpty()) return new CompletableFuture<>();
 
         CompletableFuture<?>[] arr = regions.stream()
-            .map(region -> CompletableFuture.runAsync(new TileRenderTask(plugin, saveName, region), executor))
+            .map(region -> CompletableFuture.runAsync(new TilesRenderTask(plugin, saveName, region), executor))
             .toArray(CompletableFuture[]::new);
 
-        CompletableFuture.allOf(arr).thenRunAsync(() -> writeTileBundle(saveName), executor);
+        return CompletableFuture.allOf(arr);
     }
 
-    public Future<?> renderTile(String saveName, OPanelWorldRegion region, Tile tile) {
-        return executor.submit(new TileRenderTask(plugin, saveName, region, tile));
+    public CompletableFuture<?> renderTile(String saveName, int chunkX, int chunkZ, Tile tile) {
+        return CompletableFuture.runAsync(new SingleTileRenderTask(plugin, saveName, chunkX, chunkZ, tile), executor);
     }
 
     public void submitRenderedTile(String saveName, int x, int z, byte[] bytes) {
@@ -188,6 +254,18 @@ public class MapRenderManager {
     }
 
     public void shutdown() {
+        scheduler.shutdownNow();
+        // Flush any pending bundle writes synchronously so we don't lose
+        // the latest realtime updates if the server is shutting down mid-debounce.
+        for(String saveName : new HashSet<>(pendingBundleWrite.keySet())) {
+            ScheduledFuture<?> pending = pendingBundleWrite.remove(saveName);
+            if(pending != null) pending.cancel(false);
+            try {
+                writeTileBundle(saveName);
+            } catch (Throwable e) {
+                plugin.logger.warn("Failed to flush tile bundle on shutdown for save '"+ saveName +"': "+ e.getMessage());
+            }
+        }
         executor.shutdownNow();
     }
 }

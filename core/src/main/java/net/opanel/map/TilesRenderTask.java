@@ -8,28 +8,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TileRenderTask implements Runnable {
+public class TilesRenderTask implements Runnable {
     private final OPanel plugin;
     private final MapRenderManager mapRenderManager;
     private final String saveName;
     private final OPanelWorldRegion region;
     private final List<Tile> tiles;
 
-    public TileRenderTask(OPanel plugin, String saveName, OPanelWorldRegion region) {
+    public TilesRenderTask(OPanel plugin, String saveName, OPanelWorldRegion region) {
         this.plugin = plugin;
         mapRenderManager = plugin.getMapRenderManager();
         this.saveName = saveName;
         this.region = region;
         tiles = new ArrayList<>();
-    }
-
-    // TODO: persist single-tile re-render to .otiles bundle
-    public TileRenderTask(OPanel plugin, String saveName, OPanelWorldRegion region, Tile tile) {
-        this.plugin = plugin;
-        mapRenderManager = plugin.getMapRenderManager();
-        this.saveName = saveName;
-        this.region = region;
-        tiles = List.of(tile);
     }
 
     @Override
