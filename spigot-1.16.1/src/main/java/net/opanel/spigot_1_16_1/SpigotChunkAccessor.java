@@ -89,10 +89,8 @@ public class SpigotChunkAccessor extends BaseBukkitChunkAccessor {
         List<String> biomesPalette = new ArrayList<>();
         biomesPalette.add(FALLBACK_BIOME);
 
-        Map<String, Integer> biomesIndex = new HashMap<>();
         int[] biomes = new int[64];
         for(int by = 0; by < 4; by++) {
-            int worldY = sectionY * 16 + by * 4;
             for(int bz = 0; bz < 4; bz++) {
                 for(int bx = 0; bx < 4; bx++) {
                     biomes[by * 16 + bz * 4 + bx] = 0;
