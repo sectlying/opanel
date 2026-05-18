@@ -95,6 +95,7 @@ class TileWorker {
 
     if(this.currentViewport) {
       this.render(this.currentViewport);
+      this.loadTilesInBounds(this.currentViewport);
     }
   }
 
