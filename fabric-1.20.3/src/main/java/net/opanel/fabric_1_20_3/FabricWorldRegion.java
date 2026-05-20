@@ -96,12 +96,12 @@ public class FabricWorldRegion extends BaseFabricWorldRegion implements OPanelWo
             }
         }
 
-        NbtList biomesPaletteNbt = biomes.getList("palette", NbtElement.COMPOUND_TYPE);
+        NbtList biomesPaletteNbt = biomes.getList("palette", NbtElement.STRING_TYPE);
         List<String> biomesPalette = new ArrayList<>();
         if(!biomesPaletteNbt.isEmpty()) {
             for(NbtElement biome : biomesPaletteNbt) {
                 if(!(biome instanceof NbtString)) continue;
-                biomesPalette.add(biome.toString());
+                biomesPalette.add(biome.asString());
             }
         }
 

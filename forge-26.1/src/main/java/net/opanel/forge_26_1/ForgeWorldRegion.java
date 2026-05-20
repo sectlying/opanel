@@ -106,7 +106,7 @@ public class ForgeWorldRegion extends BaseForgeWorldRegion implements OPanelWorl
         if(!biomesPaletteNbt.isEmpty()) {
             for(Tag biome : biomesPaletteNbt) {
                 if(!(biome instanceof StringTag)) continue;
-                biomesPalette.add(biome.toString());
+                biomesPalette.add(((StringTag) biome).value());
             }
         }
 

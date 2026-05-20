@@ -5,6 +5,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.Heightmap;
@@ -59,6 +60,8 @@ public class FabricChunkAccessor extends BaseFabricChunkAccessor implements OPan
 
     @Override
     protected Tile.Section buildSection(WorldChunk chunk, int sectionY) {
+        ChunkPos chunkPos = chunk.getPos();
+
         List<String> palette = new ArrayList<>();
         Map<String, Integer> paletteIndex = new HashMap<>();
         int[] blockStates = new int[16 * 16 * 16];
@@ -90,7 +93,7 @@ public class FabricChunkAccessor extends BaseFabricChunkAccessor implements OPan
             for(int bz = 0; bz < 4; bz++) {
                 for(int bx = 0; bx < 4; bx++) {
                     String biomeKey;
-                    biomeKey = chunk.getWorld().getBiome(new BlockPos(bx * 4, worldY, bz * 4))
+                    biomeKey = chunk.getWorld().getBiome(new BlockPos((chunkPos.x << 4) + bx * 4, worldY, (chunkPos.z << 4) + bz * 4))
                             .getKey()
                             .map(RegistryKey::getValue)
                             .map(Identifier::toString)

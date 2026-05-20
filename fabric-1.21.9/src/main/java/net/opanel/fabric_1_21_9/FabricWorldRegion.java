@@ -106,7 +106,7 @@ public class FabricWorldRegion extends BaseFabricWorldRegion implements OPanelWo
         if(!biomesPaletteNbt.isEmpty()) {
             for(NbtElement biome : biomesPaletteNbt) {
                 if(!(biome instanceof NbtString)) continue;
-                biomesPalette.add(biome.toString());
+                biomesPalette.add(((NbtString) biome).value());
             }
         }
 
