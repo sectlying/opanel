@@ -1,10 +1,10 @@
 package net.opanel.bukkit_helper;
 
+import net.opanel.bukkit_helper.utils.BukkitUtils;
 import net.opanel.common.OPanelPlayer;
 import net.opanel.common.OPanelPlugin;
 import net.opanel.common.OPanelServer;
 import net.opanel.common.ServerType;
-import net.opanel.utils.Utils;
 import org.bukkit.*;
 import org.bukkit.help.HelpTopic;
 import org.bukkit.plugin.Plugin;
@@ -33,13 +33,13 @@ public abstract class BaseBukkitServer implements OPanelServer {
 
     @Override
     public ServerType getServerType() {
-        if(Utils.hasClass("org.leavesmc.leaves.LeavesConfig")) {
+        if(BukkitUtils.isLeaves()) {
             return ServerType.LEAVES;
         }
-        if(Utils.hasClass("com.destroystokyo.paper.PaperConfig")) {
+        if(BukkitUtils.isPaper()) {
             return ServerType.PAPER;
         }
-        if(Utils.hasClass("org.bukkit.entity.Player$Spigot")) {
+        if(BukkitUtils.isSpigot()) {
             return ServerType.SPIGOT;
         }
         return ServerType.BUKKIT;

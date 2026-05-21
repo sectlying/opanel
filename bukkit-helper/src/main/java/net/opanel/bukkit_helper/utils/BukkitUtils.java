@@ -3,6 +3,7 @@ package net.opanel.bukkit_helper.utils;
 import com.mojang.brigadier.CommandDispatcher;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBT;
 import de.tr7zw.changeme.nbtapi.iface.ReadWriteNBTCompoundList;
+import net.opanel.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 
@@ -10,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BukkitUtils {
+    private static final boolean leaves = Utils.hasClass("org.leavesmc.leaves.LeavesConfig");
+    private static final boolean paper = Utils.hasClass("com.destroystokyo.paper.PaperConfig");
+    private static final boolean spigot = Utils.hasClass("org.bukkit.entity.Player$Spigot");
+
     public static Object getDedicatedServer() throws ReflectiveOperationException {
         Server craftServer = Bukkit.getServer();
         return craftServer.getClass().getMethod("getServer").invoke(craftServer);
@@ -46,5 +51,17 @@ public class BukkitUtils {
         for(ReadWriteNBT item : tempList) {
             list.addCompound(item);
         }
+    }
+
+    public static boolean isLeaves() {
+        return leaves;
+    }
+
+    public static boolean isPaper() {
+        return paper;
+    }
+
+    public static boolean isSpigot() {
+        return spigot;
     }
 }
