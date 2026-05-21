@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BukkitUtils {
+    private static final boolean leaves = Utils.hasClass("org.leavesmc.leaves.LeavesConfig");
+    private static final boolean paper = Utils.hasClass("com.destroystokyo.paper.PaperConfig");
+    private static final boolean spigot = Utils.hasClass("org.bukkit.entity.Player$Spigot");
+
     public static Object getDedicatedServer() throws ReflectiveOperationException {
         Server craftServer = Bukkit.getServer();
         return craftServer.getClass().getMethod("getServer").invoke(craftServer);
@@ -50,14 +54,14 @@ public class BukkitUtils {
     }
 
     public static boolean isLeaves() {
-        return Utils.hasClass("org.leavesmc.leaves.LeavesConfig");
+        return leaves;
     }
 
     public static boolean isPaper() {
-        return Utils.hasClass("com.destroystokyo.paper.PaperConfig");
+        return paper;
     }
 
     public static boolean isSpigot() {
-        return Utils.hasClass("org.bukkit.entity.Player$Spigot");
+        return spigot;
     }
 }

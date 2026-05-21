@@ -5,7 +5,6 @@ import net.opanel.common.OPanelPlayer;
 import net.opanel.common.OPanelPlugin;
 import net.opanel.common.OPanelServer;
 import net.opanel.common.ServerType;
-import net.opanel.utils.Utils;
 import org.bukkit.*;
 import org.bukkit.help.HelpTopic;
 import org.bukkit.plugin.Plugin;
