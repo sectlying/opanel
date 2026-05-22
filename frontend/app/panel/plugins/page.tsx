@@ -66,6 +66,8 @@ export default function Plugins() {
         [400, $("common.error.400")],
         [401, $("common.error.401")]
       ]);
+    } finally {
+      emitter.emit("loading-done");
     }
   };
 

@@ -63,6 +63,8 @@ export default function BukkitConfig() {
         [500, $("common.error.500")],
         [503, $("bukkit-config.error.503")]
       ]);
+    } finally {
+      emitter.emit("loading-done");
     }
   }, [push, versionCtx]);
 

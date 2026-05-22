@@ -33,6 +33,8 @@ export default function Tasks() {
         [401, $("common.error.401")],
         [500, $("common.error.500")]
       ]);
+    } finally {
+      emitter.emit("loading-done");
     }
   };
 

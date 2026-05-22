@@ -42,6 +42,8 @@ export default function Saves() {
         [400, $("common.error.400")],
         [401, $("common.error.401")]
       ]);
+    } finally {
+      emitter.emit("loading-done");
     }
   };
 

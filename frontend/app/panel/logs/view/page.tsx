@@ -13,6 +13,7 @@ import { deleteLog, downloadLog } from "../log-utils";
 import { monacoSettingsOptions } from "@/lib/settings";
 import { $ } from "@/lib/i18n";
 import { Text } from "@/components/i18n-text";
+import { emitter } from "@/lib/emitter";
 
 const MonacoEditor = dynamic(() => import("@/components/monaco-editor"), { ssr: false });
 
@@ -40,6 +41,8 @@ export default function LogView() {
         [404, $("logs.view.fetch.error.404")],
         [500, $("common.error.500")]
       ]);
+    } finally {
+      emitter.emit("loading-done");
     }
   }, [log, push]);
 
