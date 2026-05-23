@@ -9,7 +9,7 @@ import {
   useRef,
   useState
 } from "react";
-import { ArrowUp, Maximize, Minimize, Pen, Plus, SquareTerminal, Trash2, X } from "lucide-react";
+import { ArrowUp, Filter, Maximize, Minimize, Pen, Plus, SquareTerminal, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { TerminalViewer } from "@/components/terminal-viewer";
@@ -17,22 +17,21 @@ import { Button } from "@/components/ui/button";
 import { AutocompleteInput } from "@/components/autocomplete-input";
 import { cn, getCurrentArgumentIndex } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
 import { SubPage } from "../sub-page";
 import { changeSettings, getSettings } from "@/lib/settings";
 import { googleSansCode } from "@/lib/fonts";
 import { $ } from "@/lib/i18n";
-import { type ConsoleLogLevel, defaultLogLevel, TerminalClient } from "@/lib/ws/terminal";
+import { getLogLevels, TerminalClient } from "@/lib/ws/terminal";
 import { Toggle } from "@/components/ui/toggle";
 import { CreateShortcutDialog } from "./create-shortcut-dialog";
 import { VersionContext } from "@/contexts/api-context";
 import { emitter } from "@/lib/emitter";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
 const MCDR_COMMAND_PREFIX = "!!";
 const MCDR_AUTOCOMPLETE_LIST = [
@@ -49,7 +48,9 @@ export default function Terminal() {
   const [autocompleteList, setAutocompleteList] = useState<string[]>([]);
   const [historyList, setHistoryList] = useState<string[]>(getSettings("state.terminal.history"));
   const historyIndexRef = useRef(historyList.length);
-  const [logLevel, setLogLevel] = useState(defaultLogLevel);
+  const [showInfoLevel, setShowInfoLevel] = useState(getSettings("terminal.log-levels").includes("INFO"));
+  const [showWarnLevel, setShowWarnLevel] = useState(getSettings("terminal.log-levels").includes("WARN"));
+  const [showErrorLevel, setShowErrorLevel] = useState(getSettings("terminal.log-levels").includes("ERROR"));
   const [fullscreen, setFullscreen] = useState(false);
   const [shortcuts, setShortcuts] = useState<CommandShortcut[]>(getSettings("terminal.shortcuts"));
   const [editingShortcuts, setEditingShortcuts] = useState(false);
@@ -185,6 +186,10 @@ export default function Terminal() {
   }, [shortcuts]);
 
   useEffect(() => {
+    changeSettings("terminal.log-levels", getLogLevels(showInfoLevel, showWarnLevel, showErrorLevel));
+  }, [showInfoLevel, showWarnLevel, showErrorLevel]);
+
+  useEffect(() => {
     document.addEventListener("fullscreenchange", handleFullscreenChange);
 
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
@@ -200,7 +205,10 @@ export default function Terminal() {
       <div
         className="flex-4/5 max-lg:flex-3/4 max-md:flex-2/3 min-w-0 min-h-0 bg-background flex flex-col border rounded-sm"
         ref={terminalContainerRef}>
-        <TerminalViewer client={client} level={logLevel} className="flex-1 border-none"/>
+        <TerminalViewer
+          client={client}
+          levels={getLogLevels(showInfoLevel, showWarnLevel, showErrorLevel)}
+          className="flex-1 border-none"/>
         <div className={cn("px-3 pt-1 flex flex-wrap items-center gap-1 transition-[gap]", editingShortcuts && "gap-3")}>
           {versionCtx?.mcdr && (
             <Button
@@ -261,18 +269,27 @@ export default function Terminal() {
           </div>
         </div>
         <div className="p-3 pt-2 flex gap-2">
-          <Select
-            defaultValue={defaultLogLevel}
-            onValueChange={(value) => setLogLevel(value as ConsoleLogLevel)}>
-            <SelectTrigger className={cn("w-24 max-sm:w-20", googleSansCode.className)} title="日志等级">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className={googleSansCode.className}>
-              <SelectItem value="INFO">INFO</SelectItem>
-              <SelectItem value="WARN">WARN</SelectItem>
-              <SelectItem value="ERROR">ERROR</SelectItem>
-            </SelectContent>
-          </Select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="cursor-pointer">
+                <Filter />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className={googleSansCode.className}>
+              <DropdownMenuCheckboxItem checked={showInfoLevel} onCheckedChange={setShowInfoLevel}>
+                INFO
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem checked={showWarnLevel} onCheckedChange={setShowWarnLevel}>
+                WARN
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem checked={showErrorLevel} onCheckedChange={setShowErrorLevel}>
+                ERROR
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <AutocompleteInput
             className={cn("flex-1 w-full rounded-sm", googleSansCode.className)}
             placeholder={$("terminal.input.placeholder")}

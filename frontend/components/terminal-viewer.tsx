@@ -8,8 +8,6 @@ import { googleSansCode } from "@/lib/fonts";
 import {
   type ConsoleLog,
   type TerminalClient,
-  defaultLogLevel,
-  getLogLevelId,
   type ConsoleLogLevel,
 } from "@/lib/ws/terminal";
 import { parseTextToANSI, secSign } from "@/lib/formatting-codes/text";
@@ -97,12 +95,12 @@ const Log = memo(({
 export function TerminalViewer({
   client,
   simple,
-  level,
+  levels = ["INFO", "WARN", "ERROR"],
   className
 }: {
   client: TerminalClient | null
   simple?: boolean
-  level?: ConsoleLogLevel
+  levels?: ConsoleLogLevel[]
   className?: string
 }) {
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -233,7 +231,7 @@ export function TerminalViewer({
         <Log
           {...log}
           simple={simple}
-          visible={getLogLevelId(log.level) >= getLogLevelId(level ?? defaultLogLevel)}
+          visible={levels.includes(log.level)}
           key={log.uuid}/>
       ))}
     </div>
