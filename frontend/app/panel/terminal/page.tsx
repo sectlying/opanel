@@ -46,6 +46,14 @@ const MCDR_AUTOCOMPLETE_LIST = [
   "help"
 ];
 
+function parseRegex(regex: string): RegExp {
+  try {
+    return new RegExp(regex);
+  } catch {
+    return new RegExp("");
+  }
+}
+
 export default function Terminal() {
   const versionCtx = useContext(VersionContext);
   const client = useWebSocket(TerminalClient);
@@ -240,7 +248,7 @@ export default function Terminal() {
         <TerminalViewer
           client={client}
           levels={getLogLevels(showInfoLevel, showWarnLevel, showErrorLevel)}
-          filter={searchRegexMode ? new RegExp(searchString) : searchString}
+          filter={searchRegexMode ? parseRegex(searchString) : searchString}
           className="flex-1 border-none"/>
         <div className="px-3 pt-1 flex justify-between items-center max-md:flex-col max-md:items-start max-md:gap-2">
           <div className={cn("flex flex-wrap items-center gap-1 transition-[gap]", editingShortcuts && "gap-3")}>
@@ -316,7 +324,10 @@ export default function Terminal() {
                   ref={searchInputRef}/>
                 <InputGroupAddon align="inline-end" className="pr-2">
                   <InputGroupButton
-                    onClick={() => setSearchRegexMode((prev) => !prev)}
+                    onClick={() => {
+                      setSearchRegexMode((prev) => !prev);
+                      searchInputRef.current?.focus();
+                    }}
                     className={cn("cursor-pointer transition-none hover:text-muted-foreground hover:bg-transparent!", searchRegexMode && "text-theme hover:text-theme")}>
                     <Regex />
                   </InputGroupButton>
