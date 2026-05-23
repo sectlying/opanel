@@ -96,11 +96,13 @@ export function TerminalViewer({
   client,
   simple,
   levels = ["INFO", "WARN", "ERROR"],
+  filter,
   className
 }: {
   client: TerminalClient | null
   simple?: boolean
   levels?: ConsoleLogLevel[]
+  filter?: RegExp | string
   className?: string
 }) {
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -227,13 +229,21 @@ export function TerminalViewer({
     <div
       className={cn(className, "border rounded-sm bg-background overflow-auto o-scrollbar p-2")}
       ref={terminalRef}>
-      {logs.map((log) => (
-        <Log
-          {...log}
-          simple={simple}
-          visible={levels.includes(log.level)}
-          key={log.uuid}/>
-      ))}
+      {
+        logs
+          .filter(({ line }) => (
+            !filter
+            || (filter instanceof RegExp && filter.test(line))
+            || (typeof filter === "string" && line.includes(filter))
+          ))
+          .map((log) => (
+            <Log
+              {...log}
+              simple={simple}
+              visible={levels.includes(log.level)}
+              key={log.uuid}/>
+          ))
+      }
     </div>
   );
 }

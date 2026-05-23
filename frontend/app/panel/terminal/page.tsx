@@ -9,7 +9,7 @@ import {
   useRef,
   useState
 } from "react";
-import { ArrowUp, Filter, Maximize, Minimize, Pen, Plus, SquareTerminal, Trash2, X } from "lucide-react";
+import { ArrowUp, Filter, Maximize, Minimize, Pen, Plus, Regex, SquareTerminal, TextSearch, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { TerminalViewer } from "@/components/terminal-viewer";
@@ -32,6 +32,13 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput
+} from "@/components/ui/input-group";
+import { useKeydown } from "@/hooks/use-keydown";
 
 const MCDR_COMMAND_PREFIX = "!!";
 const MCDR_AUTOCOMPLETE_LIST = [
@@ -55,6 +62,11 @@ export default function Terminal() {
   const [shortcuts, setShortcuts] = useState<CommandShortcut[]>(getSettings("terminal.shortcuts"));
   const [editingShortcuts, setEditingShortcuts] = useState(false);
   const [isTypingMCDRCommand, setTypingMCDRCommand] = useState(false);
+
+  const [showSearchBox, setShowSearchBox] = useState(false);
+  const [searchString, setSearchString] = useState("");
+  const [searchRegexMode, setSearchRegexMode] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSend = useCallback(() => {
     if(!inputRef.current || !client) return;
@@ -195,6 +207,26 @@ export default function Terminal() {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
+  useKeydown("f", { ctrl: true }, (e) => {
+    e.preventDefault();
+
+    setSearchString("");
+    setShowSearchBox((prev) => !prev);
+  });
+
+  useKeydown("a", { ctrl: true }, (e) => {
+    if(showSearchBox) {
+      searchInputRef.current?.select();
+    }
+  });
+
+  useKeydown("Escape", {}, (e) => {
+    if(showSearchBox) {
+      setSearchString("");
+      setShowSearchBox(false);
+    }
+  });
+
   return (
     <SubPage
       title={$("terminal.title")}
@@ -208,65 +240,90 @@ export default function Terminal() {
         <TerminalViewer
           client={client}
           levels={getLogLevels(showInfoLevel, showWarnLevel, showErrorLevel)}
+          filter={searchRegexMode ? new RegExp(searchString) : searchString}
           className="flex-1 border-none"/>
-        <div className={cn("px-3 pt-1 flex flex-wrap items-center gap-1 transition-[gap]", editingShortcuts && "gap-3")}>
-          {versionCtx?.mcdr && (
-            <Button
-              size="xs"
-              disabled={editingShortcuts}
-              className={cn("cursor-pointer", googleSansCode.className)}
-              onClick={() => {
-                if(!inputRef.current) return;
-                inputRef.current.value = "!!MCDR ";
-                inputRef.current.focus();
-              }}
-              onDoubleClick={() => handleSend()}>
-              !!MCDR
-            </Button>
-          )}
-          {shortcuts.map((shortcut, i) => (
-            <div
-              className="relative *:cursor-pointer"
-              key={i}>
+        <div className="px-3 pt-1 flex justify-between items-center max-md:flex-col max-md:items-start max-md:gap-2">
+          <div className={cn("flex flex-wrap items-center gap-1 transition-[gap]", editingShortcuts && "gap-3")}>
+            {versionCtx?.mcdr && (
               <Button
-                variant="outline"
                 size="xs"
                 disabled={editingShortcuts}
+                className={cn("cursor-pointer", googleSansCode.className)}
                 onClick={() => {
                   if(!inputRef.current) return;
-                  inputRef.current.value = shortcut.command;
+                  inputRef.current.value = "!!MCDR ";
                   inputRef.current.focus();
                 }}
                 onDoubleClick={() => handleSend()}>
-                {shortcut.name}
+                !!MCDR
               </Button>
-              {editingShortcuts && (
-                <button
-                  className="absolute -top-1 -left-2 rounded-full bg-accent p-0.5 z-10"
-                  onClick={() => handleRemoveShortcut(i)}>
-                  <X size={13}/>
-                </button>
-              )}
-            </div>
-          ))}
-          <div className="flex *:cursor-pointer">
-            <CreateShortcutDialog
-              onCreate={(shortcut) => setShortcuts((current) => [...current, shortcut])}
-              asChild>
-              <Button
+            )}
+            {shortcuts.map((shortcut, i) => (
+              <div
+                className="relative *:cursor-pointer"
+                key={i}>
+                <Button
+                  variant="outline"
+                  size="xs"
+                  disabled={editingShortcuts}
+                  onClick={() => {
+                    if(!inputRef.current) return;
+                    inputRef.current.value = shortcut.command;
+                    inputRef.current.focus();
+                  }}
+                  onDoubleClick={() => handleSend()}>
+                  {shortcut.name}
+                </Button>
+                {editingShortcuts && (
+                  <button
+                    className="absolute -top-1 -left-2 rounded-full bg-accent p-0.5 z-10"
+                    onClick={() => handleRemoveShortcut(i)}>
+                    <X size={13}/>
+                  </button>
+                )}
+              </div>
+            ))}
+            <div className="flex *:cursor-pointer">
+              <CreateShortcutDialog
+                onCreate={(shortcut) => setShortcuts((current) => [...current, shortcut])}
+                asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-xs">
+                  <Plus />
+                </Button>
+              </CreateShortcutDialog>
+              <Toggle
                 variant="ghost"
-                size="icon-xs">
-                <Plus />
-              </Button>
-            </CreateShortcutDialog>
-            <Toggle
-              variant="ghost"
-              size="icon-xs"
-              className="data-[state=on]:*:fill-foreground"
-              onPressedChange={(pressed) => setEditingShortcuts(pressed)}>
-              <Pen />
-            </Toggle>
+                size="icon-xs"
+                className="data-[state=on]:*:fill-foreground"
+                onPressedChange={(pressed) => setEditingShortcuts(pressed)}>
+                <Pen />
+              </Toggle>
+            </div>
           </div>
+          {showSearchBox && (
+            <div className="min-w-64 py-1 min-md:self-end max-sm:min-w-full">
+              <InputGroup className="h-6 rounded-sm">
+                <InputGroupAddon className="pl-2">
+                  <TextSearch />
+                </InputGroupAddon>
+                <InputGroupInput
+                  autoFocus
+                  value={searchString}
+                  onChange={(e) => setSearchString(e.target.value)}
+                  className={cn("px-2 text-xs!", googleSansCode.className)}
+                  ref={searchInputRef}/>
+                <InputGroupAddon align="inline-end" className="pr-2">
+                  <InputGroupButton
+                    onClick={() => setSearchRegexMode((prev) => !prev)}
+                    className={cn("cursor-pointer transition-none hover:text-muted-foreground hover:bg-transparent!", searchRegexMode && "text-theme hover:text-theme")}>
+                    <Regex />
+                  </InputGroupButton>
+                </InputGroupAddon>
+              </InputGroup>
+            </div>
+          )}
         </div>
         <div className="p-3 pt-2 flex gap-2">
           <DropdownMenu>
