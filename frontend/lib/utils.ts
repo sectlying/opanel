@@ -1,9 +1,9 @@
-import type { GameMode, ServerType, SetState } from "./types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import locale from "locale-codes";
 import { NbtObject, NbtString } from "snbt-js";
 import { toast } from "sonner";
+import { Dimension, type GameMode, type ServerType, type SetState } from "./types";
 import { $ } from "./i18n";
 
 export function cn(...inputs: ClassValue[]) {
@@ -187,4 +187,13 @@ export function getLocalStorage() {
     return window.localStorage;
   }
   throw new Error("localStorage is not defined.");
+}
+
+export function getDimensionByName(name: string): Dimension {
+  switch(name) {
+    case "overworld": return Dimension.OVERWORLD;
+    case "nether": return Dimension.NETHER;
+    case "the_end": return Dimension.THE_END;
+    default: return Dimension.OVERWORLD;
+  }
 }

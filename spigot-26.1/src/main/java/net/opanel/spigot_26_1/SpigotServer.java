@@ -188,8 +188,8 @@ public class SpigotServer extends BaseBukkitServer implements OPanelServer, Code
     }
 
     @Override
-    public HashMap<String, Object> getGamerules() {
-        final World world = server.getWorlds().getFirst();
+    public HashMap<String, Object> getGamerules(OPanelDimension dimension) {
+        final World world = BukkitUtils.getWorldByDimension(dimension);
         HashMap<String, Object> gamerules = new HashMap<>();
         try {
             // Paper changed GameRule from interface to class, causing
@@ -217,10 +217,10 @@ public class SpigotServer extends BaseBukkitServer implements OPanelServer, Code
     }
 
     @Override
-    public void setGamerules(HashMap<String, Object> gamerules) {
-        HashMap<String, Object> currentGamerules = getGamerules();
+    public void setGamerules(OPanelDimension dimension, HashMap<String, Object> gamerules) {
+        HashMap<String, Object> currentGamerules = getGamerules(dimension);
         runner.runTask(() -> {
-            final World world = server.getWorlds().getFirst();
+            final World world = BukkitUtils.getWorldByDimension(dimension);
             try {
                 Class<?> gameRuleClass = GameRule.class;
                 Method getByName = gameRuleClass.getMethod("getByName", String.class);
