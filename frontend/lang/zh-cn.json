@@ -554,6 +554,9 @@
   "bukkit-config.editor.status-bar.edited": "*已编辑",
 
   "settings.title": "设置",
+  "settings.font-size-slider.small": "小",
+  "settings.font-size-slider.medium": "中",
+  "settings.font-size-slider.large": "大",
   "settings.general.title": "通用",
   "settings.editor.title": "编辑器",
   "settings.dashboard.title": "仪表盘",
@@ -575,6 +578,7 @@
   "settings.terminal.max-log-lines.description": "终端内显示日志的最大行数（最大为20000）",
   "settings.terminal.log-levels": "日志等级",
   "settings.terminal.log-levels.description": "终端所显示的日志等级",
+  "settings.terminal.log-levels.placeholder": "选择等级",
   "settings.terminal.log-time": "显示日志时间",
   "settings.terminal.thread-name": "显示线程名称",
   "settings.terminal.source-name": "显示日志源",

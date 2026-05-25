@@ -16,7 +16,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { controlWidth, SettingsNumberInput, SettingsSwitch } from "./settings-control";
+import { controlWidth, SettingsFontSizeSlider, SettingsNumberInput, SettingsSlider, SettingsSwitch } from "./settings-control";
 import { Button } from "@/components/ui/button";
 import { LoginBannerDialog } from "./login-banner-dialog";
 import { LaunchCommandDialog } from "./launch-command-dialog";
@@ -192,7 +192,7 @@ export default function Settings() {
               id="dashboard.monitor-interval"
               name={$("settings.dashboard.monitor-interval")}
               description={$("settings.dashboard.monitor-interval.description")}
-              control={<SettingsNumberInput id="dashboard.monitor-interval" min={1}/>}/>
+              control={<SettingsSlider id="dashboard.monitor-interval" unit="ms" min={500} max={5000} step={500}/>}/>
           </Section>
           <Section className="mb-4">
             <SettingsItem
@@ -351,7 +351,7 @@ export default function Settings() {
               id="terminal.font-size"
               name={$("settings.terminal.font-size")}
               description={$("settings.terminal.font-size.description")}
-              control={<SettingsNumberInput id="terminal.font-size" min={1} max={30}/>}/>
+              control={<SettingsFontSizeSlider id="terminal.font-size"/>}/>
             <SettingsItem
               id="terminal.max-log-lines"
               name={$("settings.terminal.max-log-lines")}
@@ -367,7 +367,7 @@ export default function Settings() {
                     <Button
                       variant="outline"
                       className={cn("justify-between [&>svg]:text-muted-foreground [&>svg]:opacity-50", controlWidth)}>
-                      选择等级
+                      {$("settings.terminal.log-levels.placeholder")}
                       <ChevronDown />
                     </Button>
                   </DropdownMenuTrigger>
@@ -410,7 +410,7 @@ export default function Settings() {
                 id="code-of-conduct.auto-saving-interval"
                 name={$("settings.code-of-conduct.auto-saving-interval")}
                 description={$("settings.code-of-conduct.auto-saving-interval.description")}
-                control={<SettingsNumberInput id="code-of-conduct.auto-saving-interval" min={1000}/>}/>
+                control={<SettingsSlider id="code-of-conduct.auto-saving-interval" unit="ms" min={1000} max={5000} step={500}/>}/>
             </Section>
           </SectionGroup>
           <SectionGroup title={$("settings.monaco.title")}>
@@ -423,7 +423,7 @@ export default function Settings() {
                 id="monaco.font-size"
                 name={$("settings.monaco.font-size")}
                 description={$("settings.monaco.font-size.description")}
-                control={<SettingsNumberInput id="monaco.font-size" min={1} max={30}/>}/>
+                control={<SettingsFontSizeSlider id="monaco.font-size"/>}/>
             </Section>
           </SectionGroup>
         </TabsContent>
