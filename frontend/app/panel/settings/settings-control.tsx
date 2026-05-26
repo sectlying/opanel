@@ -2,6 +2,9 @@ import type { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { changeSettings, getSettings, type SettingsStorageType } from "@/lib/settings";
+import React, { useState } from "react";
+import { Slider } from "@/components/ui/slider";
+import { $ } from "@/lib/i18n";
 
 export const controlWidth = "w-36";
 
@@ -62,5 +65,58 @@ export function SettingsSwitch({
       {...props}
       defaultChecked={getSettings(id) as boolean}
       onCheckedChange={(value) => changeSettings(id, value)}/>
+  );
+}
+
+export function SettingsSlider({
+  id,
+  unit = "",
+  ...props
+}: {
+  id: keyof SettingsStorageType
+  unit?: string
+} & React.ComponentProps<typeof Slider>) {
+  const [value, setValue] = useState(getSettings(id) as number);
+
+  const handleChange = ([newValue]: number[]) => {
+    changeSettings(id, newValue);
+    setValue(newValue);
+  };
+
+  return (
+    <div className="pb-1.5 flex flex-col gap-2.5">
+      <span className="text-xs text-muted-foreground font-semibold self-end">
+        {`${value} ${unit}`}
+      </span>
+      <Slider
+        {...props}
+        className="w-52"
+        defaultValue={[value]}
+        onValueChange={handleChange}/>
+    </div>
+  );
+}
+
+export function SettingsFontSizeSlider({
+  id,
+  ...props
+}: {
+  id: keyof SettingsStorageType
+} & React.ComponentProps<typeof Slider>) {
+  return (
+    <div className="pb-1.5 flex flex-col gap-1.5">
+      <div className="flex items-center text-muted-foreground *:flex-1">
+        <span className="text-[10px]">{$("settings.font-size-slider.small")}</span>
+        <span className="text-center text-[14px]">{$("settings.font-size-slider.medium")}</span>
+        <span className="text-right text-lg">{$("settings.font-size-slider.large")}</span>
+      </div>
+      <Slider
+        {...props}
+        min={10}
+        max={18}
+        className="w-52"
+        defaultValue={[getSettings(id) as number]}
+        onValueChange={([value]) => changeSettings(id, value)}/>
+    </div>
   );
 }

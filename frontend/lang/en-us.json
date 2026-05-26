@@ -554,6 +554,9 @@
   "bukkit-config.editor.status-bar.edited": "*Edited",
 
   "settings.title": "Settings",
+  "settings.font-size-slider.small": "Small",
+  "settings.font-size-slider.medium": "Medium",
+  "settings.font-size-slider.large": "Large",
   "settings.general.title": "General",
   "settings.editor.title": "Editor",
   "settings.dashboard.title": "Dashboard",
@@ -575,6 +578,7 @@
   "settings.terminal.max-log-lines.description": "Maximum number of log lines displayed in the terminal (up to 20,000)",
   "settings.terminal.log-levels": "Log Level",
   "settings.terminal.log-levels.description": "The log levels displayed on the terminal",
+  "settings.terminal.log-levels.placeholder": "Select",
   "settings.terminal.log-time": "Show log time",
   "settings.terminal.thread-name": "Show thread name",
   "settings.terminal.source-name": "Show log source",
