@@ -1,0 +1,53 @@
+plugins {
+    id 'java-library'
+    id 'eclipse'
+    id 'idea'
+    id 'net.neoforged.moddev' version '2.0.141'
+}
+
+version = "${rootProject.version}"
+group = "${rootProject.group}"
+
+base {
+    archivesName = "neoforge-helper"
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'NeoForge'
+        url = 'https://maven.neoforged.net/releases'
+    }
+    maven {
+        name = 'Mojang Libraries'
+        url = 'https://libraries.minecraft.net'
+    }
+    maven {
+        name = 'Parchment'
+        url = 'https://maven.parchmentmc.org'
+    }
+}
+
+neoForge {
+    version = "${common_neo_version}"
+
+    parchment {
+        minecraftVersion = "${common_minecraft_version}"
+        mappingsVersion = "${common_mappings_version}"
+    }
+}
+
+dependencies {
+    implementation "com.cozooo.dlc_manager:dlc-fileops-helper:1.0.1"
+    compileOnly(project(":core")) {
+        // To avoid conflict
+        exclude group: 'com.github.oshi', module: 'oshi-core'
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}

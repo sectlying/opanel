@@ -2,14 +2,22 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'com.gradleup.shadow' version '8.3.8'
-    id 'net.neoforged.gradle.userdev' version '7.1.21'
-    id "org.ipnmod.neosync"
+    id 'net.neoforged.moddev' version '2.0.141'
 }
 
 configurations {
     shadowImplementation
     implementation.extendsFrom(shadowImplementation)
-    runtimeClasspath.extendsFrom(localRuntime)
+}
+
+configurations.configureEach {
+    resolutionStrategy {
+        force 'com.github.oshi:oshi-core:6.8.2'
+        force 'net.java.dev.jna:jna:5.17.0'
+        force 'net.java.dev.jna:jna-platform:5.17.0'
+        force 'org.slf4j:slf4j-api:2.0.17'
+        force 'com.google.code.gson:gson:2.11.0'
+    }
 }
 
 version = "${rootProject.version}"
@@ -19,18 +27,45 @@ base {
     archivesName = 'opanel'
 }
 
-runs {
-    server {
-        argument '--nogui'
+repositories {
+    mavenCentral()
+    maven {
+        name = 'NeoForge'
+        url = 'https://maven.neoforged.net/releases'
+    }
+    maven {
+        name = 'Mojang Libraries'
+        url = 'https://libraries.minecraft.net'
+    }
+    maven {
+        name = 'Parchment'
+        url = 'https://maven.parchmentmc.org'
     }
 }
 
-repositories {
-    mavenCentral()
+neoForge {
+    version = "${neo_version}"
+
+    parchment {
+        minecraftVersion = "${minecraft_version}"
+        mappingsVersion = "${mappings_version}"
+    }
+
+    runs {
+        server {
+            server()
+            programArgument '--nogui'
+        }
+    }
+
+    mods {
+        opanel {
+            sourceSet sourceSets.main
+        }
+    }
 }
 
 dependencies {
-    implementation "net.neoforged:neoforge:${neo_version}"
     shadowImplementation "com.cozooo.dlc_manager:dlc-fileops-helper:1.0.1"
 
     shadowImplementation(project(":core")) {
@@ -38,8 +73,13 @@ dependencies {
         exclude group: 'com.github.oshi', module: 'oshi-core'
         exclude group: 'org.slf4j', module: 'slf4j-api'
     }
+    compileOnly(project(":neoforge-helper"))
 
     implementation "com.github.oshi:oshi-core:6.8.2"
+}
+
+tasks.named('compileJava', JavaCompile) {
+    source(project(":neoforge-helper").sourceSets.main.allSource)
 }
 
 tasks.named('processResources', ProcessResources) {
@@ -53,6 +93,8 @@ tasks.named('processResources', ProcessResources) {
     filesMatching(['META-INF/neoforge.mods.toml']) {
         expand replaceProperties + [project: project]
     }
+
+    from project(":neoforge-helper").sourceSets.main.resources
 }
 
 shadowJar {

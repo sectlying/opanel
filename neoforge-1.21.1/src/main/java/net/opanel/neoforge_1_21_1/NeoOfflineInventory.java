@@ -3,7 +3,7 @@ package net.opanel.neoforge_1_21_1;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.*;
 import net.opanel.common.OPanelInventory;
-import net.opanel.neoforge_1_21_1.utils.NeoUtils;
+import net.opanel.neoforge_helper.utils.NeoUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;

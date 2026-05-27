@@ -1,4 +1,4 @@
-package net.opanel.neoforge_1_21_1.utils;
+package net.opanel.neoforge_helper.utils;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
