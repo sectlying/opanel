@@ -7,6 +7,7 @@ import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.chunk.storage.RegionStorageInfo;
 import net.opanel.common.OPanelWorldRegion;
 import net.opanel.map.Tile;
+import net.opanel.neoforge_helper.BaseNeoWorldRegion;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -15,22 +16,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NeoWorldRegion implements OPanelWorldRegion {
-    private final String saveName;
-    private final Path regionPath;
-
+public class NeoWorldRegion extends BaseNeoWorldRegion implements OPanelWorldRegion {
     public NeoWorldRegion(String saveName, Path regionPath) {
-        this.saveName = saveName;
-
-        if(!regionPath.toString().endsWith(".mca")) {
-            throw new IllegalArgumentException("Region file extension must be .mca");
-        }
-        this.regionPath = regionPath;
-    }
-
-    @Override
-    public Path getPath() {
-        return regionPath;
+        super(saveName, regionPath);
     }
 
     @Override
@@ -60,7 +48,8 @@ public class NeoWorldRegion implements OPanelWorldRegion {
         return tiles;
     }
 
-    private Tile readTile(int chunkX, int chunkZ, DataInputStream stream) {
+    @Override
+    protected Tile readTile(int chunkX, int chunkZ, DataInputStream stream) {
         try {
             CompoundTag nbt = NbtIo.read(stream);
             CompoundTag heightMaps = nbt.getCompound("Heightmaps");
@@ -88,7 +77,8 @@ public class NeoWorldRegion implements OPanelWorldRegion {
         }
     }
 
-    private Tile.Section readTileSection(CompoundTag sectionNbt) {
+    @Override
+    protected Tile.Section readTileSection(CompoundTag sectionNbt) {
         byte y = sectionNbt.getByte("Y");
 
         CompoundTag blockStates = sectionNbt.getCompound("block_states");

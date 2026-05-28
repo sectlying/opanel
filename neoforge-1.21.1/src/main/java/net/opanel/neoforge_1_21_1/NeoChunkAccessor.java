@@ -12,33 +12,21 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.opanel.common.OPanelChunkAccessor;
 import net.opanel.map.Tile;
+import net.opanel.neoforge_helper.BaseNeoChunkAccessor;
 import net.opanel.utils.AnvilUtility;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
-public class NeoChunkAccessor implements OPanelChunkAccessor {
-    private final MinecraftServer server;
-
+public class NeoChunkAccessor extends BaseNeoChunkAccessor implements OPanelChunkAccessor {
     public NeoChunkAccessor(MinecraftServer server) {
-        this.server = server;
+        super(server);
     }
 
     @Override
-    public Tile readLiveTile(int chunkX, int chunkZ) {
-        try {
-            Future<Tile> future = server.submit(() -> readOnMainThread(chunkX, chunkZ));
-            return future.get(SYNC_CALL_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private Tile readOnMainThread(int chunkX, int chunkZ) {
+    protected Tile readOnMainThread(int chunkX, int chunkZ) {
         ServerLevel world = server.overworld();
         LevelChunk chunk = world.getChunkSource().getChunkNow(chunkX, chunkZ);
         if(chunk == null) return null;
@@ -70,7 +58,8 @@ public class NeoChunkAccessor implements OPanelChunkAccessor {
         return new Tile(chunkX, chunkZ, sections, packedHeightMap, true);
     }
 
-    private Tile.Section buildSection(LevelChunk chunk, int sectionY) {
+    @Override
+    protected Tile.Section buildSection(LevelChunk chunk, int sectionY) {
         ChunkPos chunkPos = chunk.getPos();
 
         List<String> palette = new ArrayList<>();

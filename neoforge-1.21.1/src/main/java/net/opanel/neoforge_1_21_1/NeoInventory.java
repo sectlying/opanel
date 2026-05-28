@@ -3,35 +3,28 @@ package net.opanel.neoforge_1_21_1;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.opanel.common.OPanelInventory;
+import net.opanel.neoforge_helper.BaseNeoInventory;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class NeoInventory implements OPanelInventory {
-    private final ServerPlayer player;
+public class NeoInventory extends BaseNeoInventory implements OPanelInventory {
     private final DynamicOps<Tag> serializationContext;
 
     public NeoInventory(ServerPlayer player, MinecraftServer server) {
-        this.player = player;
-        serializationContext = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
-    }
+        super(player);
 
-    @Override
-    public int getSize() {
-        return player.getInventory().getContainerSize();
+        serializationContext = server.registryAccess().createSerializationContext(NbtOps.INSTANCE);
     }
 
     @Override
@@ -47,7 +40,7 @@ public class NeoInventory implements OPanelInventory {
                 continue;
             }
 
-            final String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+            final String id = itemToId(stack.getItem());
             DataResult<Tag> encodeResult = ItemStack.CODEC.encodeStart(serializationContext, stack);
             CompoundTag nbt = (CompoundTag) encodeResult.result().orElse(new CompoundTag());
             CompoundTag components = nbt.getCompound("components");
@@ -62,20 +55,6 @@ public class NeoInventory implements OPanelInventory {
     }
 
     @Override
-    public void setItems(List<OPanelItemStack> items) throws CommandSyntaxException {
-        Inventory inventory = player.getInventory();
-        inventory.clearContent();
-
-        for(OPanelItemStack item : items) {
-            inventory.setItem(item.slot, toItemStack(item));
-        }
-    }
-
-    @Override
-    public void setItem(OPanelItemStack item) throws CommandSyntaxException {
-        player.getInventory().setItem(item.slot, toItemStack(item));
-    }
-
     protected ItemStack toItemStack(OPanelItemStack item) throws CommandSyntaxException {
         if(item == null || item.isEmpty()) return ItemStack.EMPTY;
 

@@ -5,48 +5,27 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.*;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.storage.LevelResource;
 import net.opanel.common.OPanelGameMode;
 import net.opanel.common.OPanelPlayer;
+import net.opanel.neoforge_helper.BaseNeoOfflinePlayer;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
-public class NeoOfflinePlayer implements OPanelPlayer {
-    private final PlayerList playerManager;
-    private final Path playerDataPath;
+public class NeoOfflinePlayer extends BaseNeoOfflinePlayer implements OPanelPlayer {
     private final GameProfile profile;
 
-    private final UUID uuid;
-
     public NeoOfflinePlayer(MinecraftServer server, UUID uuid) {
-        playerManager = server.getPlayerList();
-        playerDataPath = server.getWorldPath(LevelResource.PLAYER_DATA_DIR).resolve(uuid +".dat");
+        super(server, uuid);
+
         GameProfileCache profileCache = server.getProfileCache();
-        this.uuid = uuid;
-
-        if(!Files.exists(playerDataPath)) {
-            throw new NullPointerException("Player data file for UUID "+ uuid +" unavailable.");
-        }
-
         if(profileCache == null) {
             throw new NullPointerException("Cannot get player profile cache.");
-        }
-
-        ServerPlayer serverPlayer = playerManager.getPlayer(uuid);
-        if(serverPlayer != null && !serverPlayer.hasDisconnected()) {
-            throw new IllegalStateException("The provided player is online, please use ForgePlayer class instead.");
         }
 
         Optional<GameProfile> profileOpt = profileCache.get(uuid);
@@ -60,16 +39,6 @@ public class NeoOfflinePlayer implements OPanelPlayer {
     @Override
     public String getName() {
         return profile.getName();
-    }
-
-    @Override
-    public String getUUID() {
-        return uuid.toString();
-    }
-
-    @Override
-    public boolean isOnline() {
-        return false;
     }
 
     @Override
@@ -123,11 +92,6 @@ public class NeoOfflinePlayer implements OPanelPlayer {
     }
 
     @Override
-    public void kick(String reason) {
-        throw new IllegalStateException("The player is offline.");
-    }
-
-    @Override
     public void ban(String reason) {
         if(isBanned()) return;
         UserBanList bannedList = playerManager.getBans();
@@ -147,15 +111,5 @@ public class NeoOfflinePlayer implements OPanelPlayer {
     public void pardon() {
         if(!isBanned()) return;
         playerManager.getBans().remove(profile);
-    }
-
-    @Override
-    public int getPing() {
-        throw new IllegalStateException("The player is offline.");
-    }
-
-    @Override
-    public InetAddress getAddress() {
-        throw new IllegalStateException("The player is offline.");
     }
 }
