@@ -1,4 +1,4 @@
-package net.opanel.neoforge_1_21_1;
+package net.opanel.neoforge_1_21_3;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.status.ServerStatus;
@@ -178,7 +178,7 @@ public class NeoServer extends BaseNeoServer implements OPanelServer {
     public void setGamerules(OPanelDimension dimension, HashMap<String, Object> gamerules) {
         HashMap<String, Object> currentGamerules = getGamerules(dimension);
         final GameRules gameRulesObj = NeoUtils.getLevelByDimension(server, dimension).getGameRules();
-        GameRules.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
+        gameRulesObj.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
             @Override
             public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
                 GameRules.GameRuleTypeVisitor.super.visit(key, type);

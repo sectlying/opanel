@@ -169,54 +169,6 @@ public abstract class BaseNeoServer implements OPanelServer {
     }
 
     @Override
-    public HashMap<String, Object> getGamerules(OPanelDimension dimension) {
-        final CompoundTag gamerulesNbt = NeoUtils.getLevelByDimension(server, dimension).getGameRules().createTag();
-        HashMap<String, Object> gamerules = new HashMap<>();
-        for(String key : gamerulesNbt.getAllKeys()) {
-            final String valueStr = gamerulesNbt.getString(key);
-            if(valueStr.equals("true") || valueStr.equals("false")) {
-                gamerules.put(key, Boolean.valueOf(valueStr));
-            } else if(Utils.isNumeric(valueStr)) {
-                gamerules.put(key, Integer.valueOf(valueStr));
-            } else {
-                gamerules.put(key, valueStr);
-            }
-        }
-        return gamerules;
-    }
-
-    @Override
-    public void setGamerules(OPanelDimension dimension, HashMap<String, Object> gamerules) {
-        HashMap<String, Object> currentGamerules = getGamerules(dimension);
-        final GameRules gameRulesObj = NeoUtils.getLevelByDimension(server, dimension).getGameRules();
-        GameRules.visitGameRuleTypes(new GameRules.GameRuleTypeVisitor() {
-            @Override
-            @SuppressWarnings("unchecked")
-            public <T extends GameRules.Value<T>> void visit(GameRules.Key<T> key, GameRules.Type<T> type) {
-                GameRules.GameRuleTypeVisitor.super.visit(key, type);
-
-                final String ruleName = key.getId();
-                final Object value = gamerules.get(ruleName);
-                if(value == null) return;
-                final Object currentValue = currentGamerules.get(ruleName);
-                if(value.equals(currentValue)) return;
-
-                T rule = type.createRule();
-                if(rule instanceof GameRules.BooleanValue) { // boolean
-                    ((GameRules.BooleanValue) rule).set((boolean) value, server);
-                    gameRulesObj.getRule(key).setFrom(rule, server);
-                } else if(rule instanceof GameRules.IntegerValue) { // integer
-                    int n = ((Number) value).intValue();
-                    ((GameRules.IntegerValue) rule).set(n, server);
-                    gameRulesObj.getRule(key).setFrom(rule, server);
-                } else { // string
-                    sendServerCommand("gamerule "+ ruleName +" "+ value);
-                }
-            }
-        });
-    }
-
-    @Override
     public void reload() {
         // directly execute /reload
         sendServerCommand("reload");
