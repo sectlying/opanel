@@ -1,0 +1,32 @@
+package net.opanel.neoforge_1_21_5;
+
+import com.mojang.authlib.GameProfile;
+import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.server.players.UserWhiteListEntry;
+import net.opanel.common.OPanelWhitelist;
+import net.opanel.neoforge_helper.BaseNeoWhitelist;
+
+import java.io.IOException;
+import java.util.UUID;
+
+public class NeoWhitelist extends BaseNeoWhitelist implements OPanelWhitelist {
+    public NeoWhitelist(UserWhiteList whitelist) {
+        super(whitelist);
+    }
+
+    @Override
+    public void add(OPanelWhitelistEntry entry) throws IOException {
+        if(getNames().contains(entry.name)) return;
+        GameProfile profile = new GameProfile(UUID.fromString(entry.uuid), entry.name);
+        whitelist.add(new UserWhiteListEntry(profile));
+        whitelist.save();
+    }
+
+    @Override
+    public void remove(OPanelWhitelistEntry entry) throws IOException {
+        if(!getNames().contains(entry.name)) return;
+        GameProfile profile = new GameProfile(UUID.fromString(entry.uuid), entry.name);
+        whitelist.remove(new UserWhiteListEntry(profile));
+        whitelist.save();
+    }
+}
