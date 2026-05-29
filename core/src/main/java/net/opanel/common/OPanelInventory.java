@@ -1,6 +1,5 @@
 package net.opanel.common;
 
-import com.google.gson.Gson;
 import net.opanel.utils.Utils;
 
 import java.util.Comparator;

@@ -1,8 +1,7 @@
 import com.github.jk1.license.render.TextReportRenderer
 
 plugins {
-    /* This plugin is workaround for https://github.com/neoforged/NeoGradle/issues/282 */
-    id 'org.ipnmod.neosync' version '1.2.0'
+    id 'org.jetbrains.gradle.plugin.idea-ext' version '1.4.1'
     id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT' apply false
     id 'com.github.jk1.dependency-license-report' version '2.9'
     id 'java'

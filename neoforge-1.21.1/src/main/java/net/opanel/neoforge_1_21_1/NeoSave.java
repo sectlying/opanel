@@ -11,6 +11,7 @@ import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.opanel.common.*;
+import net.opanel.neoforge_helper.BaseNeoSave;
 import net.opanel.utils.Utils;
 
 import java.io.FileInputStream;
@@ -21,14 +22,12 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class NeoSave implements OPanelSave {
-    private final MinecraftServer server;
-    private final Path savePath;
+public class NeoSave extends BaseNeoSave implements OPanelSave {
     private CompoundTag nbt;
 
     public NeoSave(MinecraftServer server, Path path) {
-        this.server = server;
-        savePath = path;
+        super(server, path);
+
         try {
             nbt = NbtIo.readCompressed(savePath.resolve("level.dat"), NbtAccounter.unlimitedHeap())
                     .getCompound("Data");
@@ -40,19 +39,11 @@ public class NeoSave implements OPanelSave {
         }
     }
 
-    private void saveNbt() throws IOException {
+    @Override
+    protected void saveNbt() throws IOException {
         CompoundTag dataNbt = new CompoundTag();
         dataNbt.put("Data", nbt);
         NbtIo.writeCompressed(dataNbt, savePath.resolve("level.dat"));
-    }
-
-    private ServerLevel getCurrentWorld() {
-        return server.overworld();
-    }
-
-    @Override
-    public String getName() {
-        return savePath.getFileName().toString();
     }
 
     @Override
@@ -64,34 +55,6 @@ public class NeoSave implements OPanelSave {
     public void setDisplayName(String displayName) throws IOException {
         nbt.putString("LevelName", displayName);
         saveNbt();
-    }
-
-    @Override
-    public Path getPath() {
-        return savePath.toAbsolutePath();
-    }
-
-    @Override
-    public long getSize() throws IOException {
-        return Utils.getDirectorySize(savePath);
-    }
-
-    @Override
-    public boolean isRunning() {
-        return server.getWorldPath(LevelResource.LEVEL_DATA_FILE).getParent().getFileName().toString().equals(getName());
-    }
-
-    @Override
-    public boolean isCurrent() throws IOException {
-        Properties properties = new Properties();
-        properties.load(new FileInputStream(OPanelServer.serverPropertiesPath.toFile()));
-        return properties.getProperty("level-name").replaceAll("\u00c2", "").equals(getName());
-    }
-
-    @Override
-    public void setToCurrent() throws IOException {
-        if(isCurrent()) return;
-        OPanelServer.writePropertiesContent(OPanelServer.getPropertiesContent().replaceAll("level-name=.+", "level-name="+ getName()));
     }
 
     @Override
@@ -208,11 +171,6 @@ public class NeoSave implements OPanelSave {
             datapacksNbt.getList("Disabled", Tag.TAG_STRING).add(StringTag.valueOf(id));
         }
         saveNbt();
-    }
-
-    @Override
-    public void delete() throws IOException {
-        Utils.deleteDirectoryRecursively(savePath);
     }
 
     @Override

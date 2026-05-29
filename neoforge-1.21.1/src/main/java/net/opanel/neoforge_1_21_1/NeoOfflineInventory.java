@@ -3,20 +3,20 @@ package net.opanel.neoforge_1_21_1;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.*;
 import net.opanel.common.OPanelInventory;
-import net.opanel.neoforge_1_21_1.utils.NeoUtils;
+import net.opanel.neoforge_helper.BaseNeoOfflineInventory;
+import net.opanel.neoforge_helper.utils.NeoUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NeoOfflineInventory implements OPanelInventory {
-    private final Path playerDataPath;
+public class NeoOfflineInventory extends BaseNeoOfflineInventory implements OPanelInventory {
     private CompoundTag nbt;
     private ListTag nbtList;
 
     public NeoOfflineInventory(Path playerDataPath) {
-        this.playerDataPath = playerDataPath;
+        super(playerDataPath);
 
         try {
             nbt = NbtIo.readCompressed(playerDataPath, NbtAccounter.unlimitedHeap());
@@ -26,6 +26,7 @@ public class NeoOfflineInventory implements OPanelInventory {
         }
     }
 
+    @Override
     protected void saveNbt() throws IOException {
         nbt.put("Inventory", nbtList);
         NbtIo.writeCompressed(nbt, playerDataPath);
@@ -125,7 +126,8 @@ public class NeoOfflineInventory implements OPanelInventory {
         }
     }
 
-    private CompoundTag toNbt(OPanelItemStack item) throws CommandSyntaxException {
+    @Override
+    protected CompoundTag toNbt(OPanelItemStack item) throws CommandSyntaxException {
         CompoundTag itemNbt = new CompoundTag();
         itemNbt.putByte("Slot", (byte) item.slot);
         itemNbt.putString("id", item.id);

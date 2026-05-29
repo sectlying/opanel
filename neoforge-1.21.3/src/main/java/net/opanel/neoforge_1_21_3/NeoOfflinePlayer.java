@@ -1,0 +1,46 @@
+package net.opanel.neoforge_1_21_3;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.server.*;
+import net.opanel.common.OPanelGameMode;
+import net.opanel.common.OPanelPlayer;
+import net.opanel.neoforge_helper.BaseNeoOfflinePlayer;
+
+import java.io.IOException;
+import java.util.UUID;
+
+public class NeoOfflinePlayer extends BaseNeoOfflinePlayer implements OPanelPlayer {
+    public NeoOfflinePlayer(MinecraftServer server, UUID uuid) {
+        super(server, uuid);
+    }
+
+    @Override
+    public NeoOfflineInventory getInventory() {
+        return new NeoOfflineInventory(playerDataPath);
+    }
+
+    @Override
+    public OPanelGameMode getGameMode() {
+        try {
+            CompoundTag nbt = NbtIo.readCompressed(playerDataPath, NbtAccounter.unlimitedHeap());
+            int gamemodeId = nbt.getInt("playerGameType");
+            return OPanelGameMode.fromId(gamemodeId);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public void setGameMode(OPanelGameMode gamemode) {
+        try {
+            CompoundTag nbt = NbtIo.readCompressed(playerDataPath, NbtAccounter.unlimitedHeap());
+            nbt.putInt("playerGameType", gamemode.getId());
+            NbtIo.writeCompressed(nbt, playerDataPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
