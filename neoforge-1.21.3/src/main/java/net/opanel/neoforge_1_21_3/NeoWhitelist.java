@@ -13,20 +13,4 @@ public class NeoWhitelist extends BaseNeoWhitelist implements OPanelWhitelist {
     public NeoWhitelist(UserWhiteList whitelist) {
         super(whitelist);
     }
-
-    @Override
-    public void add(OPanelWhitelistEntry entry) throws IOException {
-        if(getNames().contains(entry.name)) return;
-        GameProfile profile = new GameProfile(UUID.fromString(entry.uuid), entry.name);
-        whitelist.add(new UserWhiteListEntry(profile));
-        whitelist.save();
-    }
-
-    @Override
-    public void remove(OPanelWhitelistEntry entry) throws IOException {
-        if(!getNames().contains(entry.name)) return;
-        GameProfile profile = new GameProfile(UUID.fromString(entry.uuid), entry.name);
-        whitelist.remove(new UserWhiteListEntry(profile));
-        whitelist.save();
-    }
 }

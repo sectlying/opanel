@@ -29,26 +29,6 @@ public class NeoServer extends BaseNeoServer implements OPanelServer {
     }
 
     @Override
-    public ServerType getServerType() {
-        return ServerType.NEOFORGE;
-    }
-
-    @Override
-    public byte[] getFavicon() {
-        byte[] serverIconPNG = super.getFavicon();
-        if(serverIconPNG != null) return serverIconPNG;
-
-        ServerStatus status = server.getStatus();
-        if(status == null) return null;
-
-        Optional<ServerStatus.Favicon> faviconOptional = status.favicon();
-        if(faviconOptional.isEmpty()) return null;
-
-        ServerStatus.Favicon favicon = faviconOptional.get();
-        return favicon.iconBytes();
-    }
-
-    @Override
     public void setFavicon(byte[] iconBytes) throws IOException {
         super.setFavicon(iconBytes);
         // reload server favicon

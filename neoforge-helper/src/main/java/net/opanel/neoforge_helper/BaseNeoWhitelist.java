@@ -3,7 +3,9 @@ package net.opanel.neoforge_helper;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.authlib.GameProfile;
 import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.server.players.UserWhiteListEntry;
 import net.opanel.common.OPanelWhitelist;
 import net.opanel.utils.Utils;
 
@@ -12,6 +14,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public abstract class BaseNeoWhitelist implements OPanelWhitelist {
     protected final UserWhiteList whitelist;
@@ -41,5 +44,21 @@ public abstract class BaseNeoWhitelist implements OPanelWhitelist {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         Utils.writeTextFile(whitelistPath, gson.toJson(entries));
         whitelist.load();
+    }
+
+    @Override
+    public void add(OPanelWhitelistEntry entry) throws IOException {
+        if(getNames().contains(entry.name)) return;
+        GameProfile profile = new GameProfile(UUID.fromString(entry.uuid), entry.name);
+        whitelist.add(new UserWhiteListEntry(profile));
+        whitelist.save();
+    }
+
+    @Override
+    public void remove(OPanelWhitelistEntry entry) throws IOException {
+        if(!getNames().contains(entry.name)) return;
+        GameProfile profile = new GameProfile(UUID.fromString(entry.uuid), entry.name);
+        whitelist.remove(new UserWhiteListEntry(profile));
+        whitelist.save();
     }
 }

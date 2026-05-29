@@ -44,6 +44,21 @@ public abstract class BaseNeoServer implements OPanelServer {
     }
 
     @Override
+    public byte[] getFavicon() {
+        byte[] serverIconPNG = OPanelServer.super.getFavicon();
+        if(serverIconPNG != null) return serverIconPNG;
+
+        ServerStatus status = server.getStatus();
+        if(status == null) return null;
+
+        Optional<ServerStatus.Favicon> faviconOptional = status.favicon();
+        if(faviconOptional.isEmpty()) return null;
+
+        ServerStatus.Favicon favicon = faviconOptional.get();
+        return favicon.iconBytes();
+    }
+
+    @Override
     public String getMotd() {
         return server.getMotd();
     }
