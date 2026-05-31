@@ -212,7 +212,7 @@ export default function Plugins() {
                 variant="outline"
                 onClick={() => handleExportList()}>
                 <Download />
-                导出
+                {$("plugins.action.export")}
               </Button>
               <AlertDialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
                 <AlertDialogTrigger asChild>

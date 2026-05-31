@@ -159,7 +159,7 @@ export default function Players() {
               variant="outline"
               onClick={() => handleExportList()}>
               <Download />
-              导出
+              {$("players.action.export")}
             </Button>
             <BannedIpsDialog asChild>
               <Button variant="outline">
