@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type PropsWithChildren } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Backpack, Ban, BrushCleaning, ShieldOff, UserMinus, UserPlus } from "lucide-react";
+import { Backpack, Ban, BrushCleaning, Copy, ShieldOff, UserMinus, UserPlus } from "lucide-react";
 import {
   Sheet,
   SheetClose,
@@ -45,6 +45,8 @@ import { emitter } from "@/lib/emitter";
 import { millisToTime } from "@/lib/time";
 import { $ } from "@/lib/i18n";
 import { Alert } from "@/components/alert";
+import { cn, copyToClipboard } from "@/lib/utils";
+import { googleSansCode } from "@/lib/fonts";
 
 const formSchema = z.object({
   gamemode: z.enum(Object.values(GameMode) as [string, ...string[]]),
@@ -124,18 +126,44 @@ export function PlayerSheet({
               <SkinViewer
                 name={player.name}
                 uuid={player.uuid}/>
-              <div className="flex justify-center items-center gap-2">
-                <OnlineBadge isOnline={player.isOnline}/>
-                {
-                  player.name
-                  ? <h2 className="inline-block text-lg font-semibold">{player.name}</h2>
-                  : (
-                    <span className="text-muted-foreground italic">
-                      &lt;{$("players.unnamed")}&gt;
-                    </span>
-                  )
-                }
+              
+              <div className="flex flex-col items-center gap-1">
+                <div className="flex items-center gap-2">
+                  <OnlineBadge isOnline={player.isOnline}/>
+                  {
+                    player.name
+                    ? <h2 className="inline-block text-lg font-semibold">{player.name}</h2>
+                    : (
+                      <span className="text-muted-foreground italic">
+                        &lt;{$("players.unnamed")}&gt;
+                      </span>
+                    )
+                  }
+                  {player.name && (
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      className="cursor-pointer text-muted-foreground! hover:bg-transparent! *:size-3!"
+                      onClick={() => copyToClipboard(player.name)}>
+                      <Copy />
+                    </Button>
+                  )}
+                </div>
+
+                <div className="flex items-center">
+                  <span className={cn("text-xs text-muted-foreground", googleSansCode.className)}>
+                    {player.uuid}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    className="cursor-pointer text-muted-foreground! hover:bg-transparent! *:size-3!"
+                    onClick={() => copyToClipboard(player.uuid)}>
+                    <Copy />
+                  </Button>
+                </div>
               </div>
+
               {player.isOnline && (
                 <div className="flex flex-col gap-3">
                   {player.ip && (
