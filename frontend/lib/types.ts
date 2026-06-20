@@ -159,6 +159,7 @@ export interface InfoResponse {
     arch: string
     cpuName: string
     cpuCore: number
+    cpuThread: number
     memory: number
     gpus: string[]
     java: string
