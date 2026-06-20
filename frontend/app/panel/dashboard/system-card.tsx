@@ -74,7 +74,7 @@ function SystemDialog({
               icon={Cpu}
               name="CPU">
               <div>{ctx.system.cpuName ?? "-"}</div>
-              <div className="text-foreground">({ctx.system.cpuCore} Core(s))</div>
+              <div className="text-foreground">({ctx.system.cpuCore} Core(s) / {ctx.system.cpuThread} Thread(s))</div>
             </SystemInfoItem>
             {ctx.system.gpus.length > 0 && (
               <SystemInfoItem
