@@ -327,6 +327,7 @@
   "players.inventory.description": "プレイヤーのインベントリの内容を表示および編集する",
   "players.inventory.ws.error.400": "メッセージパラメータが間違っています",
   "players.inventory.ws.error.404": "そのプレイヤーが見つかりません",
+  "players.inventory.interact-forbbiden": "Modで追加されたアイテムは操作できません",
   "players.inventory.nbt-mode.label": "NBT 編集モード",
   "players.inventory.explorer.search.placeholder": "アイテムを検索...",
   "players.inventory.nbt-editor.title": "アイテムのNBTを編集",

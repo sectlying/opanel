@@ -9,6 +9,7 @@ import {
   useRef,
   useState
 } from "react";
+import { toast } from "sonner";
 import { InventoryContext } from "@/contexts/inventory-context";
 import { cn } from "@/lib/utils";
 import { minecraftAE } from "@/lib/fonts";
@@ -25,6 +26,7 @@ import LeatherHelmetOverlayTexture from "@/assets/images/overlays/leather-helmet
 import LeatherChestplateOverlayTexture from "@/assets/images/overlays/leather-chestplate-overlay.png";
 import LeatherLeggingsOverlayTexture from "@/assets/images/overlays/leather-leggings-overlay.png";
 import LeatherBootsOverlayTexture from "@/assets/images/overlays/leather-boots-overlay.png";
+import MissingTexture from "@/assets/images/missing-texture.png";
 import "@/style/item-effect.css";
 
 export const AIR = "minecraft:air";
@@ -84,10 +86,15 @@ export function InventoryItem({
       : null;
     return byModel ?? textures.find(({ id }) => id === itemStack.id);
   }, [textures, itemStack.id, textureIdFromItemModel]);
+  const isModItem = textureItem === undefined && itemStack.id !== AIR;
   const hoveredItemTagRef = useRef<HTMLDivElement | null>(null);
 
   const handleLeftClick = () => {
     if(held || !ctx || nbtEditMode) return;
+    if(isModItem) {
+      toast.error($("players.inventory.interact-forbbiden"));
+      return;
+    }
 
     if(!currentlyHeldItem) { // pick up the item
       setCurrentlyHeldItem(itemStack);
@@ -121,6 +128,10 @@ export function InventoryItem({
   const handleRightClick = (e: MouseEvent) => {
     e.preventDefault();
     if(held || !ctx || nbtEditMode) return;
+    if(isModItem) {
+      toast.error($("players.inventory.interact-forbbiden"));
+      return;
+    }
 
     if(!currentlyHeldItem && isFromExplorer(itemStack)) { // pick up 64 from explorer
       setCurrentlyHeldItem({ ...itemStack, count: 64 });
@@ -155,6 +166,10 @@ export function InventoryItem({
     e.preventDefault();
     if(e.button !== 1) return;
     if(held || !ctx || nbtEditMode) return;
+    if(isModItem) {
+      toast.error($("players.inventory.interact-forbbiden"));
+      return;
+    }
 
     if(!isFromExplorer(itemStack)) {
       setCurrentlyHeldItem({ ...itemStack, count: 64 });
@@ -218,11 +233,11 @@ export function InventoryItem({
       onMouseMove={(e) => handleMouseMove(e)}
       onMouseLeave={() => handleMouseLeave()}
       ref={ref}>
-      {textureItem && (
+      {itemStack.id !== AIR && (
         <img
           className="w-full z-0"
-          src={textureItem.texture}
-          alt={textureItem.id}/>
+          src={textureItem?.texture || MissingTexture.src}
+          alt={textureItem?.id || "missing-texture"}/>
       )}
       {itemStack.count > 1 && (
         <span className={cn(
