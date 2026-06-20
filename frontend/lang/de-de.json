@@ -327,6 +327,7 @@
   "players.inventory.description": "Anzeigen und Bearbeiten des Inventarinhalts des Spielers",
   "players.inventory.ws.error.400": "Ungültige Nachrichtenparameter",
   "players.inventory.ws.error.404": "Spieler nicht gefunden",
+  "players.inventory.interact-forbbiden": "Von Mods hinzugefügte Gegenstände können nicht bearbeitet werden",
   "players.inventory.nbt-mode.label": "NBT-Bearbeitungsmodus",
   "players.inventory.explorer.search.placeholder": "Gegenstand suchen...",
   "players.inventory.nbt-editor.title": "Gegenstands-NBT bearbeiten",

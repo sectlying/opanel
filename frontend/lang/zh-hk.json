@@ -327,6 +327,7 @@
   "players.inventory.description": "查看和編輯玩家的背包内容",
   "players.inventory.ws.error.400": "消息參數錯誤",
   "players.inventory.ws.error.404": "找不到該玩家",
+  "players.inventory.interact-forbbiden": "唔可以操作Mod新增嘅物品",
   "players.inventory.nbt-mode.label": "NBT 編輯模式",
   "players.inventory.explorer.search.placeholder": "搜尋物品...",
   "players.inventory.nbt-editor.title": "編輯物品 NBT",
