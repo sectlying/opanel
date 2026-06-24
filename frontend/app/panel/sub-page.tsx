@@ -39,7 +39,7 @@ export function SubPage({
   }, [title, subTitle]);
 
   return (
-    <div className={cn("group max-h-screen bg-sidebar flex-1 flex flex-col", outerClassName)}>
+    <div className={cn("group max-h-[100dvh] bg-sidebar flex-1 flex flex-col", outerClassName)}>
       <Navbar className="px-8 max-sm:px-2"/>
       <div className={cn("flex-1 p-8 flex flex-col gap-4 overflow-y-auto", !description && "gap-8", showHeader ? pageClassName : className)}>
         {

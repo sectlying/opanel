@@ -242,7 +242,7 @@ export default function Terminal() {
       title={$("terminal.title")}
       category={$("sidebar.server")}
       icon={<SquareTerminal />}
-      outerClassName="max-h-screen overflow-y-hidden"
+      outerClassName="max-h-[100dvh] overflow-y-hidden"
       className="flex-1 min-h-0 flex gap-3">
       <div
         className="flex-4/5 max-lg:flex-3/4 max-md:flex-2/3 min-w-0 min-h-0 bg-background flex flex-col border rounded-sm"

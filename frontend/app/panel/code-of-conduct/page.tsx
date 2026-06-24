@@ -160,7 +160,7 @@ export default function CodeOfConduct() {
       description={$("coc.description")}
       category={$("sidebar.management")}
       icon={<HeartHandshake />}
-      outerClassName="max-h-screen overflow-y-hidden max-lg:max-h-none max-lg:overflow-y-auto"
+      outerClassName="max-h-[100dvh] overflow-y-hidden max-lg:max-h-none max-lg:overflow-y-auto"
       className="flex-1 min-h-0">
       <FilesEditor>
         {

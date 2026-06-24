@@ -53,7 +53,7 @@ export default function PanelLayout({
     <SidebarProvider
       open={sidebarOpen}
       onOpenChange={setSidebarOpen}
-      className="overflow-hidden">
+      className="h-[100dvh] min-h-0 overflow-hidden">
       <VersionContext value={versionInfo}>
         <AppSidebar />
         <SidebarInset className="min-w-0" suppressHydrationWarning>
