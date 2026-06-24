@@ -4,8 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
 import { createMockTerminalWsClient, createTerminalSettingsState } from "@/test/terminal-helper";
 import { createMockVersionContext } from "@/test/contexts-helper";
+import { mockUseIsMobile, setMockUseIsMobile } from "@/test/test-helper";
 import { VersionContext } from "@/contexts/api-context";
 import Terminal from "./page";
+
+mockUseIsMobile();
 
 const { wsRef, settingsRef, changeSettingsSpy } = vi.hoisted(() => ({
   wsRef: {
@@ -314,6 +317,23 @@ describe("test terminal page", () => {
         expect(itemList).toEqual([]);
         expect(input).toHaveAttribute("data-prefix", "/");
       });
+    });
+  });
+
+  describe("mobile view", () => {
+    beforeEach(() => {
+      setMockUseIsMobile(true);
+    });
+
+    afterEach(() => {
+      setMockUseIsMobile(false);
+    });
+
+    it("should hide fullscreen button on mobile", () => {
+      render(<Terminal />);
+
+      const fullscreenButton = screen.getByTitle("[terminal.fullscreen]");
+      expect(fullscreenButton).toHaveClass("hidden");
     });
   });
 

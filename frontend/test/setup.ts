@@ -1,5 +1,10 @@
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
+import { isMobileMockState } from "./use-mobile-mock";
+
+vi.mock("@/hooks/use-mobile", () => ({
+  useIsMobile: () => isMobileMockState.current
+}));
 
 vi.mock("next/font/local", () => ({
   default: () => ({

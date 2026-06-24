@@ -1,5 +1,6 @@
 import { beforeEach, vi } from "vitest";
 import { changeSettings } from "@/lib/settings";
+import { isMobileMockState } from "./use-mobile-mock";
 
 export function mockRealI18n() {
   vi.unmock("@/lib/i18n");
@@ -7,6 +8,14 @@ export function mockRealI18n() {
   beforeEach(() => {
     changeSettings("system.language", "zh-cn");
   });
+}
+
+export function mockUseIsMobile(initialValue = false) {
+  isMobileMockState.current = initialValue;
+}
+
+export function setMockUseIsMobile(value: boolean) {
+  isMobileMockState.current = value;
 }
 
 export function mockMonacoEditor() {
