@@ -9,5 +9,11 @@ export async function getTextures(version: string): Promise<Item[] | null> {
   }
 
   if(suitableVersion == null) return null;
-  return (await import(`minecraft-textures/dist/textures/json/${suitableVersion}.json`)).items;
+  
+  // Exclude unsupported versions: 1.12, 1.13, 1.14, 1.15, 1.17, 1.18
+  // along with the unused *.id.json siblings
+  return (await import(
+    /* webpackExclude: /\.id\.json$|^\.\/1\.(1[2-5]|17|18)\.json$/ */
+    `minecraft-textures-json/${suitableVersion}.json`
+  )).items;
 }
