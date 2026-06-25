@@ -3,10 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { InventoryContext } from "@/contexts/inventory-context";
 import { createItem, createMockInventoryContextValue } from "@/test/inventory-helper";
-import { mockMonacoEditor } from "@/test/test-helper";
 import { ItemDialog } from "./item-dialog";
-
-mockMonacoEditor();
 
 vi.mock("@/lib/i18n", async () => {
   const actual = await vi.importActual("@/lib/i18n");

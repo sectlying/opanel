@@ -181,22 +181,37 @@ export default function Logs() {
           asChild>
           <Button
             variant="destructive"
-            className="cursor-pointer">
+            className="cursor-pointer max-md:hidden">
             <Trash2 />
             {$("logs.clear")}
           </Button>
         </Alert>
       </div>
 
-      <InputGroup className="min-lg:hidden">
-        <InputGroupAddon>
-          <Search />
-        </InputGroupAddon>
-        <InputGroupInput
-          value={searchString}
-          placeholder={$("logs.search.placeholder")}
-          onChange={(e) => setSearchString(e.target.value)}/>
-      </InputGroup>
+      <div className="flex items-center gap-2 min-lg:hidden">
+        <InputGroup>
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+          <InputGroupInput
+            value={searchString}
+            placeholder={$("logs.search.placeholder")}
+            onChange={(e) => setSearchString(e.target.value)}/>
+        </InputGroup>
+
+        <Alert
+          title={$("logs.clear.alert.title")}
+          description={$("logs.clear.alert.description")}
+          onAction={() => handleClearLogs()}
+          asChild>
+          <Button
+            variant="destructive"
+            className="cursor-pointer min-md:hidden">
+            <Trash2 />
+            {$("logs.clear")}
+          </Button>
+        </Alert>
+      </div>
 
       <DataTable
         columns={columns}

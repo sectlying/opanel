@@ -160,7 +160,7 @@ export function InfoCard({
             <Button
               variant="secondary"
               size="icon-sm"
-              className="absolute bottom-0 ml-2 mb-2 cursor-pointer hidden group-hover/favicon:flex">
+              className="absolute bottom-0 ml-2 mb-2 cursor-pointer flex md:hidden md:group-hover/favicon:flex">
               <Pencil />
             </Button>
           </FaviconDialog>

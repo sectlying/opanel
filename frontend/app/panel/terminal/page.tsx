@@ -39,6 +39,7 @@ import {
   InputGroupInput
 } from "@/components/ui/input-group";
 import { useKeydown } from "@/hooks/use-keydown";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const MCDR_COMMAND_PREFIX = "!!";
 const MCDR_AUTOCOMPLETE_LIST = [
@@ -55,6 +56,7 @@ function parseRegex(regex: string): RegExp {
 }
 
 export default function Terminal() {
+  const isMobile = useIsMobile();
   const versionCtx = useContext(VersionContext);
   const client = useWebSocket(TerminalClient);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -240,7 +242,7 @@ export default function Terminal() {
       title={$("terminal.title")}
       category={$("sidebar.server")}
       icon={<SquareTerminal />}
-      outerClassName="max-h-screen overflow-y-hidden"
+      outerClassName="max-h-[100dvh] overflow-y-hidden"
       className="flex-1 min-h-0 flex gap-3">
       <div
         className="flex-4/5 max-lg:flex-3/4 max-md:flex-2/3 min-w-0 min-h-0 bg-background flex flex-col border rounded-sm"
@@ -382,7 +384,7 @@ export default function Terminal() {
           <Button
             variant="ghost"
             size="icon"
-            className="cursor-pointer"
+            className={cn("cursor-pointer", isMobile && "hidden")}
             title={fullscreen ? $("terminal.exit-fullscreen") : $("terminal.fullscreen")}
             onClick={() => handleFullscreen()}>
             {fullscreen ? <Minimize /> : <Maximize />}

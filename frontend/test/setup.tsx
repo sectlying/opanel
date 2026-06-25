@@ -1,5 +1,10 @@
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
+import { isMobileMockState } from "./mock-state";
+
+vi.mock("@/hooks/use-mobile", () => ({
+  useIsMobile: () => isMobileMockState.current
+}));
 
 vi.mock("next/font/local", () => ({
   default: () => ({
@@ -22,5 +27,25 @@ vi.mock("sonner", () => ({
     success: vi.fn(),
     warning: vi.fn(),
     error: vi.fn()
+  }
+}));
+
+vi.mock("@/components/monaco-editor", () => ({
+  default: function MockMonacoEditor({
+    value,
+    theme,
+    onChange
+  }: {
+    value?: string
+    theme?: string
+    onChange?: (value?: string) => void
+  }) {
+    return (
+      <textarea
+        data-testid="monaco-editor"
+        data-theme={theme ?? ""}
+        value={value ?? ""}
+        onChange={(e) => onChange?.(e.target.value)}/>
+    );
   }
 }));

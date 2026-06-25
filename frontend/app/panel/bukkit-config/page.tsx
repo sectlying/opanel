@@ -116,7 +116,7 @@ export default function BukkitConfig() {
       description={$("bukkit-config.description")}
       category={$("sidebar.config")}
       icon={<PaintBucket />}
-      outerClassName="max-h-screen overflow-y-hidden max-lg:max-h-none max-lg:overflow-y-auto"
+      outerClassName="max-h-[100dvh] overflow-y-hidden max-lg:max-h-none max-lg:overflow-y-auto"
       className="flex-1 min-h-0">
       <FilesEditor>
         <FilesEditorSidebar className="h-full justify-between">
