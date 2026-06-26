@@ -39,15 +39,6 @@ export const googleSansCode = localFont({
 });
 
 /**
- * GNU Unifont
- * 
- * @see https://unifoundry.com/unifont/index.html
- */
-export const unifont = localFont({
-  src: [{ path: "../assets/fonts/unifont-16.0.04.otf", style: "normal" }]
-});
-
-/**
  * New Minecraft AE font
  * - Mojangles (Minecraft Seven)
  * - GNU Unifont
