@@ -3,7 +3,6 @@ const path = require("path");
 const axios = require("axios");
 const yauzl = require("yauzl");
 
-
 const versionManifestUrl = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
 
 const minecraftAssetsPath = path.resolve(process.cwd(), "assets/minecraft");
@@ -21,6 +20,25 @@ const argv = process.argv.slice(2);
 const FORCE = argv.includes("--force") || argv.includes("-f");
 const RUN_DIRECTLY = argv.includes("--run");
 
+const langKeyPrefixesToExtract = [
+  "block",
+  "item",
+  "enchantment",
+  "effect",
+  "filled_map",
+  "container"
+];
+
+function filterLangKeys(langObj) {
+  const filtered = {};
+  for(const key of Object.keys(langObj)) {
+    if(langKeyPrefixesToExtract.some((prefix) => key.startsWith(prefix))) {
+      filtered[key] = langObj[key];
+    }
+  }
+  return filtered;
+}
+
 async function getMinecraftVersionInfo() {
   const versionManifest = (await axios.get(versionManifestUrl)).data;
   const latestRelease = versionManifest.latest.release;
@@ -36,9 +54,9 @@ async function fetchMinecraftLanguages() {
   for(const lang of languagesToFetch) {
     const { hash } = assetsIndex[`minecraft/lang/${lang}.json`];
     const langFileUrl = `https://resources.download.minecraft.net/${hash.slice(0, 2)}/${hash}`;
-    const langFileContent = (await axios.get(langFileUrl)).data;
+    const langFileContent = filterLangKeys((await axios.get(langFileUrl)).data);
     const langFilePath = path.resolve(minecraftAssetsPath, `${lang}.json`);
-    
+
     fs.mkdirSync(path.dirname(langFilePath), { recursive: true });
     fs.writeFileSync(langFilePath, JSON.stringify(langFileContent));
     console.log(`Downloaded language file ${lang}.json`);
@@ -80,7 +98,8 @@ async function extractNecessaryAssetsFromMinecraft() {
             readStream.on("data", (chunk) => chunks.push(chunk));
             readStream.on("end", () => {
               const langFilePath = path.resolve(minecraftAssetsPath, "en_us.json");
-              fs.writeFileSync(langFilePath, Buffer.concat(chunks));
+              const langFileContent = filterLangKeys(JSON.parse(Buffer.concat(chunks).toString("utf-8")));
+              fs.writeFileSync(langFilePath, JSON.stringify(langFileContent));
               console.log("Extracted en_us.json from client.jar");
               zipfile.readEntry();
             });
