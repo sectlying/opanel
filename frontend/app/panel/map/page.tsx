@@ -5,7 +5,7 @@ import type { MapCanvasHandle } from "./map-canvas";
 import type { RenderSettings } from "@/lib/map/tile-worker-protocol";
 import dynamic from "next/dynamic";
 import { type PropsWithChildren, useEffect, useRef, useState } from "react";
-import { MapPinned, Minus, Plus, Settings } from "lucide-react";
+import { House, MapPinned, Minus, Plus, Settings } from "lucide-react";
 import { SubPage } from "../sub-page";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "@/components/ui/button";
@@ -163,6 +163,12 @@ export default function ServerMap() {
         </div>
 
         <div className="absolute bottom-6 right-6 flex flex-col gap-2 [&_button]:shadow-xl [&_button]:bg-accent! [&_button]:cursor-pointer">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => mapRef.current?.setCenter({ x: 0, z: 0 })}>
+            <House />
+          </Button>
           <CoordDialog
             getInitialCoord={() => mapRef.current?.getCenter() ?? null}
             onTeleport={(coord) => mapRef.current?.setCenter(coord)}
