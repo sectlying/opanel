@@ -417,7 +417,7 @@
   "map.settings.description": "喺呢度調整地圖顯示設定選項。",
   "map.settings.biome-coloring": "生物群系著色",
   "map.settings.render-shadows": "渲染陰影",
-  "map.settings.debug-mode": "偵錯模式",
+  "map.settings.debug-mode": "除錯模式",
   "map.coord-dialog.title": "傳送到座標",
   "map.coord-dialog.description": "快速跳轉到地圖上嘅某個位置。",
   "map.coord-dialog.x-coordinate": "X 座標",
