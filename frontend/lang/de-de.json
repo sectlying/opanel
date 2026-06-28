@@ -418,6 +418,11 @@
   "map.settings.biome-coloring": "Biom-Färbung",
   "map.settings.render-shadows": "Schatten rendern",
   "map.settings.debug-mode": "Debug-Modus",
+  "map.coord-dialog.title": "Zu Koordinaten teleportieren",
+  "map.coord-dialog.description": "Springe schnell zu einer Position auf der Karte.",
+  "map.coord-dialog.x-coordinate": "X-Koordinate",
+  "map.coord-dialog.z-coordinate": "Z-Koordinate",
+  "map.coord-dialog.teleport": "Teleportieren",
 
   "logs.title": "Logs",
   "logs.description": "Verwalten und Einsehen aller Logdateien des Servers",
