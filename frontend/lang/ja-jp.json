@@ -64,6 +64,16 @@
   "login.reset.content.line2": "具体的な手順については、文書を参照してください：",
   "login.reset.content.line3": "設定ファイルのパスについては、次をご参照ください：",
 
+  "login.oidc.button": "{0} でログイン",
+  "login.oidc.error": "OIDCログインに失敗しました。もう一度お試しください。",
+  "login.oidc.bind.title": "アクセスキーをバインド",
+  "login.oidc.bind.description": "OIDCでの初回ログインです。サーバーのアクセスキーを入力してバインドを完了してください。",
+  "login.oidc.bind.input.label": "アクセスキー",
+  "login.oidc.bind.input.placeholder": "アクセスキーを入力してください...",
+  "login.oidc.bind.input.empty": "キーを入力してください",
+  "login.oidc.bind.input.incorrect": "アクセスキーが正しくありません",
+  "login.oidc.bind.confirm": "バインドしてログイン",
+
   "not-found.description": "あなたがアクセスしたパスは存在しません",
   "not-found.home": "パネルホーム",
   "not-found.back": "前のページに戻る",

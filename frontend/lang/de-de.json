@@ -64,6 +64,16 @@
   "login.reset.content.line2": "Detaillierte Schritte finden Sie in der Dokumentation:",
   "login.reset.content.line3": "Den Pfad zur Konfigurationsdatei finden Sie unter:",
 
+  "login.oidc.button": "Mit {0} anmelden",
+  "login.oidc.error": "OIDC-Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+  "login.oidc.bind.title": "Zugriffsschlüssel binden",
+  "login.oidc.bind.description": "Dies ist Ihre erste Anmeldung über OIDC. Bitte geben Sie den Server-Zugriffsschlüssel ein, um die Bindung abzuschließen.",
+  "login.oidc.bind.input.label": "Zugriffsschlüssel",
+  "login.oidc.bind.input.placeholder": "Bitte Zugriffsschlüssel eingeben...",
+  "login.oidc.bind.input.empty": "Der Schlüssel darf nicht leer sein",
+  "login.oidc.bind.input.incorrect": "Falscher Zugriffsschlüssel",
+  "login.oidc.bind.confirm": "Binden und anmelden",
+
   "not-found.description": "Der von Ihnen aufgerufene Pfad existiert nicht",
   "not-found.home": "Panel-Startseite",
   "not-found.back": "Zurück zur vorherigen Seite",

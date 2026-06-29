@@ -64,6 +64,16 @@
   "login.reset.content.line2": "Pour les étapes détaillées, veuillez consulter la documentation :",
   "login.reset.content.line3": "Pour le chemin du fichier de configuration, voir :",
 
+  "login.oidc.button": "Se connecter avec {0}",
+  "login.oidc.error": "Échec de la connexion OIDC. Veuillez réessayer.",
+  "login.oidc.bind.title": "Lier la clé d'accès",
+  "login.oidc.bind.description": "C'est votre première connexion via OIDC. Veuillez entrer la clé d'accès du serveur pour terminer la liaison.",
+  "login.oidc.bind.input.label": "Clé d'accès",
+  "login.oidc.bind.input.placeholder": "Veuillez entrer la clé d'accès...",
+  "login.oidc.bind.input.empty": "La clé ne peut pas être vide",
+  "login.oidc.bind.input.incorrect": "Clé d'accès incorrecte",
+  "login.oidc.bind.confirm": "Lier et se connecter",
+
   "not-found.description": "Le chemin d'accès que vous visitez n'existe pas",
   "not-found.home": "Accueil du panneau",
   "not-found.back": "Retour à la page précédente",

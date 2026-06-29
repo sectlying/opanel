@@ -64,6 +64,16 @@
   "login.reset.content.line2": "具體步驟請參考文件：",
   "login.reset.content.line3": "配置檔案路徑請參閱：",
 
+  "login.oidc.button": "使用 {0} 登入",
+  "login.oidc.error": "OIDC 登入失敗，請重試。",
+  "login.oidc.bind.title": "綁定存取金鑰",
+  "login.oidc.bind.description": "這是你首次透過 OIDC 登入，請輸入伺服器存取金鑰以完成綁定。",
+  "login.oidc.bind.input.label": "存取金鑰",
+  "login.oidc.bind.input.placeholder": "請輸入存取金鑰...",
+  "login.oidc.bind.input.empty": "金鑰不可為空",
+  "login.oidc.bind.input.incorrect": "存取金鑰錯誤",
+  "login.oidc.bind.confirm": "綁定並登入",
+
   "not-found.description": "你訪問的路徑不存在",
   "not-found.home": "面板主頁",
   "not-found.back": "返回上一頁",

@@ -95,6 +95,8 @@ public class WebServer {
         AssetsController assetsController = new AssetsController(plugin);
         DownloadController downloadController = new DownloadController(plugin);
         AuthController authController = new AuthController(plugin);
+        OidcManager oidcManager = new OidcManager();
+        OidcController oidcController = new OidcController(plugin, oidcManager);
         BannedIpsController bannedIpsController = new BannedIpsController(plugin);
         ControlController controlController = new ControlController(plugin);
         GamerulesController gamerulesController = new GamerulesController(plugin);
@@ -136,6 +138,10 @@ public class WebServer {
                 post("/", authController.validateCram);
                 post("/check", authController.checkAuth);
                 post("/logout", authController.logout);
+                get("oidc/login", oidcController.login);
+                get("oidc/callback", oidcController.callback);
+                post("oidc/verify-secret", oidcController.verifySecret);
+                get("oidc/config", oidcController.getConfig);
             });
             path("banned-ips", () -> {
                 get("/", bannedIpsController.getBannedIps);

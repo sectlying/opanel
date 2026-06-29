@@ -64,6 +64,16 @@
   "login.reset.content.line2": "For detailed steps, please refer to the docs: ",
   "login.reset.content.line3": "For configuration file path, please refer to: ",
 
+  "login.oidc.button": "Login with {0}",
+  "login.oidc.error": "OIDC login failed. Please try again.",
+  "login.oidc.bind.title": "Bind Access Key",
+  "login.oidc.bind.description": "This is your first time logging in via OIDC. Please enter the server access key to complete the binding.",
+  "login.oidc.bind.input.label": "Access Key",
+  "login.oidc.bind.input.placeholder": "Please enter the access key...",
+  "login.oidc.bind.input.empty": "The key cannot be empty",
+  "login.oidc.bind.input.incorrect": "Incorrect access key",
+  "login.oidc.bind.confirm": "Bind and Login",
+
   "not-found.description": "Page Not Found",
   "not-found.home": "Homepage",
   "not-found.back": "Go Back",

@@ -64,6 +64,16 @@
   "login.reset.content.line2": "자세한 단계는 다음 문서를 참조하세요:",
   "login.reset.content.line3": "구성 파일 경로는 다음을 참조하세요:",
 
+  "login.oidc.button": "{0}(으)로 로그인",
+  "login.oidc.error": "OIDC 로그인에 실패했습니다. 다시 시도해 주세요.",
+  "login.oidc.bind.title": "접근 키 바인딩",
+  "login.oidc.bind.description": "OIDC를 통한 첫 로그인입니다. 서버 접근 키를 입력하여 바인딩을 완료해 주세요.",
+  "login.oidc.bind.input.label": "접근 키",
+  "login.oidc.bind.input.placeholder": "접근 키를 입력하세요...",
+  "login.oidc.bind.input.empty": "키를 입력하세요",
+  "login.oidc.bind.input.incorrect": "접근 키가 올바르지 않습니다",
+  "login.oidc.bind.confirm": "바인딩 및 로그인",
+
   "not-found.description": "방문하신 경로가 존재하지 않습니다",
   "not-found.home": "패널 홈으로",
   "not-found.back": "이전 페이지로",

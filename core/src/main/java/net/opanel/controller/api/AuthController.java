@@ -5,6 +5,9 @@ import io.javalin.http.Handler;
 import io.javalin.http.HttpStatus;
 
 import net.opanel.OPanel;
+import net.opanel.config.OidcConfiguration;
+import net.opanel.storage.Storage;
+import net.opanel.storage.StorageKey;
 import net.opanel.utils.Utils;
 import net.opanel.controller.BaseController;
 import net.opanel.web.JwtManager;
@@ -25,7 +28,17 @@ public class AuthController extends BaseController {
         super(plugin);
     }
 
+    private boolean isOidcEnabled() {
+        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
+        return oidcConfig != null && oidcConfig.enabled;
+    }
+
     public Handler getCram = ctx -> {
+        if(isOidcEnabled()) {
+            sendResponse(ctx, HttpStatus.FORBIDDEN, "Secret login is disabled when OIDC is enabled.");
+            return;
+        }
+
         final String id = ctx.queryParam("id");
         if(id == null) {
             sendResponse(ctx, HttpStatus.BAD_REQUEST, "Id is missing.");
@@ -47,6 +60,11 @@ public class AuthController extends BaseController {
     };
 
     public Handler validateCram = ctx -> {
+        if(isOidcEnabled()) {
+            sendResponse(ctx, HttpStatus.FORBIDDEN, "Secret login is disabled when OIDC is enabled.");
+            return;
+        }
+
         RequestBodyType reqBody = ctx.bodyAsClass(RequestBodyType.class);
         if(reqBody.id == null || reqBody.result == null) {
             sendResponse(ctx, HttpStatus.BAD_REQUEST, "Id or result is missing.");

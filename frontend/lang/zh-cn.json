@@ -64,6 +64,16 @@
   "login.reset.content.line2": "具体步骤请参见文档：",
   "login.reset.content.line3": "配置文件路径请参见：",
 
+  "login.oidc.button": "使用 {0} 登录",
+  "login.oidc.error": "OIDC 登录失败，请重试。",
+  "login.oidc.bind.title": "绑定访问密钥",
+  "login.oidc.bind.description": "这是你首次通过 OIDC 登录，请输入服务器访问密钥以完成绑定。",
+  "login.oidc.bind.input.label": "访问密钥",
+  "login.oidc.bind.input.placeholder": "请输入访问密钥...",
+  "login.oidc.bind.input.empty": "密钥不可为空",
+  "login.oidc.bind.input.incorrect": "访问密钥错误",
+  "login.oidc.bind.confirm": "绑定并登录",
+
   "not-found.description": "你访问的路径不存在",
   "not-found.home": "面板首页",
   "not-found.back": "返回上一页",
