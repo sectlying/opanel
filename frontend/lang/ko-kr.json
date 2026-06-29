@@ -418,6 +418,11 @@
   "map.settings.biome-coloring": "바이옴 색상 지정",
   "map.settings.render-shadows": "음영 렌더링",
   "map.settings.debug-mode": "디버그 모드",
+  "map.coord-dialog.title": "좌표로 텔레포트",
+  "map.coord-dialog.description": "지도에서 지정한 위치로 빠르게 이동합니다.",
+  "map.coord-dialog.x-coordinate": "X 좌표",
+  "map.coord-dialog.z-coordinate": "Z 좌표",
+  "map.coord-dialog.teleport": "텔레포트",
 
   "logs.title": "로그 파일",
   "logs.description": "서버의 모든 로그 파일을 관리하고 확인합니다",

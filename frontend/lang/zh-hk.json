@@ -418,6 +418,11 @@
   "map.settings.biome-coloring": "生物群系著色",
   "map.settings.render-shadows": "渲染陰影",
   "map.settings.debug-mode": "除錯模式",
+  "map.coord-dialog.title": "傳送到座標",
+  "map.coord-dialog.description": "快速跳轉到地圖上嘅某個位置。",
+  "map.coord-dialog.x-coordinate": "X 座標",
+  "map.coord-dialog.z-coordinate": "Z 座標",
+  "map.coord-dialog.teleport": "傳送",
 
   "logs.title": "日誌",
   "logs.description": "管理和查看伺服器的所有日誌文件",

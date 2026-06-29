@@ -418,6 +418,11 @@
   "map.settings.biome-coloring": "バイオーム着色",
   "map.settings.render-shadows": "影のレンダリング",
   "map.settings.debug-mode": "デバッグモード",
+  "map.coord-dialog.title": "座標にテレポート",
+  "map.coord-dialog.description": "マップ上の指定した位置へすばやく移動します。",
+  "map.coord-dialog.x-coordinate": "X 座標",
+  "map.coord-dialog.z-coordinate": "Z 座標",
+  "map.coord-dialog.teleport": "テレポート",
 
   "logs.title": "ログ",
   "logs.description": "サーバーのすべてのログファイルを管理および確認する",
