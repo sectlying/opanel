@@ -18,8 +18,11 @@ import { type ChunksFlushedPayload, MapClient } from "@/lib/ws/map";
 const TILE_BLOCKS = 16;
 
 export interface MapCanvasHandle {
-  zoomIn: () => void;
-  zoomOut: () => void;
+  zoomIn: () => void
+  zoomOut: () => void
+  setCenter: (coord: { x: number, z: number }) => void
+  getCenter: () => { x: number, z: number }
+  refresh: () => void
 }
 
 interface MapCanvasProps {
@@ -56,7 +59,13 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
   const saveRef = useLatestRef(save);
   const client = useWebSocket(MapClient);
 
-  const { viewportRef, postViewport, postRequestTiles, setViewportSize } = useMapTiles({
+  const {
+    viewportRef,
+    postViewport,
+    postRequestTiles,
+    setViewportSize,
+    refresh,
+  } = useMapTiles({
     postWorkerMessage: (msg) => workerRef.current?.postMessage(msg),
   });
 
@@ -182,9 +191,23 @@ const MapCanvas = forwardRef<MapCanvasHandle, MapCanvasProps>(function MapCanvas
     }
   }, [save, onFpsChangeRef, onTilesLoadedChangeRef, onLoadRef, postRequestTiles]);
 
+  const setCenter = (coord: { x: number, z: number }) => {
+    viewportRef.current.camera.x = coord.x / TILE_BLOCKS;
+    viewportRef.current.camera.z = coord.z / TILE_BLOCKS;
+    postRequestTiles();
+  };
+
+  const getCenter = () => ({
+    x: viewportRef.current.camera.x * TILE_BLOCKS,
+    z: viewportRef.current.camera.z * TILE_BLOCKS,
+  });
+
   useImperativeHandle(ref, () => ({
     zoomIn: () => applyZoom(1.1, 0, 0),
     zoomOut: () => applyZoom(0.9, 0, 0),
+    setCenter,
+    getCenter,
+    refresh: () => refresh(),
   }));
 
   useEffect(() => {

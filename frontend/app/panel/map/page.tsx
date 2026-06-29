@@ -5,7 +5,7 @@ import type { MapCanvasHandle } from "./map-canvas";
 import type { RenderSettings } from "@/lib/map/tile-worker-protocol";
 import dynamic from "next/dynamic";
 import { type PropsWithChildren, useEffect, useRef, useState } from "react";
-import { Minus, Plus, Settings } from "lucide-react";
+import { House, MapPinned, Minus, Plus, RotateCw, Settings } from "lucide-react";
 import { SubPage } from "../sub-page";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ import { $ } from "@/lib/i18n";
 import { changeSettings, getSettings } from "@/lib/settings";
 import { DEFAULT_ZOOM } from "@/hooks/use-map-tiles";
 import { emitter } from "@/lib/emitter";
+import { CoordDialog } from "./coord-dialog";
 
 const MapCanvas = dynamic(() => import("./map-canvas"), { ssr: false });
 
@@ -151,6 +152,13 @@ export default function ServerMap() {
           <span className={cn("ml-auto px-2 text-xs", googleSansCode.className)}>
             {coord ? `${coord.x.toFixed(0)} ${coord.z.toFixed(0)}` : ""}
           </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="cursor-pointer"
+            onClick={() => mapRef.current?.refresh()}>
+            <RotateCw />
+          </Button>
           <MapSettingsPopover
             settings={settings}
             onSettingsChange={handleSettingsChange}
@@ -161,16 +169,30 @@ export default function ServerMap() {
           </MapSettingsPopover>
         </div>
 
-        <ButtonGroup
-          orientation="vertical"
-          className="absolute bottom-6 right-6 *:shadow-xl *:bg-accent! *:cursor-pointer">
-          <Button variant="outline" size="icon" onClick={() => mapRef.current?.zoomIn()}>
-            <Plus />
+        <div className="absolute bottom-6 right-6 flex flex-col gap-2 [&_button]:shadow-xl [&_button]:bg-accent! [&_button]:cursor-pointer">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => mapRef.current?.setCenter({ x: 0, z: 0 })}>
+            <House />
           </Button>
-          <Button variant="outline" size="icon" onClick={() => mapRef.current?.zoomOut()}>
-            <Minus />
-          </Button>
-        </ButtonGroup>
+          <CoordDialog
+            getInitialCoord={() => mapRef.current?.getCenter() ?? null}
+            onTeleport={(coord) => mapRef.current?.setCenter(coord)}
+            asChild>
+            <Button variant="outline" size="icon">
+              <MapPinned />
+            </Button>
+          </CoordDialog>
+          <ButtonGroup orientation="vertical">
+            <Button variant="outline" size="icon" onClick={() => mapRef.current?.zoomIn()}>
+              <Plus />
+            </Button>
+            <Button variant="outline" size="icon" onClick={() => mapRef.current?.zoomOut()}>
+              <Minus />
+            </Button>
+          </ButtonGroup>
+        </div>
 
         {settings.debugMode && (
           <div className={cn("absolute top-2 right-2 min-w-24 px-1 py-0.5 bg-accent/50 text-xs flex flex-col items-end gap-1", googleSansCode.className)}>

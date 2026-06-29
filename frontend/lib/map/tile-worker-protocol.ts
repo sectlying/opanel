@@ -57,6 +57,11 @@ export interface RequestTilesMessage {
   viewport: Viewport
 }
 
+export interface RefreshMessage {
+  type: "refresh"
+  viewport: Viewport
+}
+
 export interface ChunksFlushMessage {
   type: "chunksFlush"
   flushedChunks: [number, number][]
@@ -82,6 +87,7 @@ export type MainToWorker =
   | SetFpsReportingMessage
   | ViewportMessage
   | RequestTilesMessage
+  | RefreshMessage
   | ChunksFlushMessage;
 
 export type WorkerToMain =
