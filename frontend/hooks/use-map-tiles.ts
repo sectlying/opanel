@@ -13,7 +13,7 @@ export interface UseMapTilesOptions {
   postWorkerMessage: (msg: MainToWorker) => void;
 }
 
-type ViewportUpdateKind = "viewport" | "requestTiles";
+type ViewportUpdateKind = "viewport" | "requestTiles" | "refresh";
 
 function parseViewportFromUrl(): { x: number, z: number, zoom: number } {
   const fallback = { x: 0, z: 0, zoom: DEFAULT_ZOOM };
@@ -111,7 +111,9 @@ export function useMapTiles({ postWorkerMessage }: UseMapTilesOptions) {
       postWorkerMessageRef.current(
         k === "viewport"
         ? { type: "viewport", viewport: viewportRef.current }
-        : { type: "requestTiles", viewport: viewportRef.current }
+        : k === "requestTiles"
+        ? { type: "requestTiles", viewport: viewportRef.current }
+        : { type: "refresh", viewport: viewportRef.current }
       );
 
       if(k === "requestTiles") {
@@ -122,6 +124,7 @@ export function useMapTiles({ postWorkerMessage }: UseMapTilesOptions) {
 
   const postViewport = useCallback(() => schedulePost("viewport"), [schedulePost]);
   const postRequestTiles = useCallback(() => schedulePost("requestTiles"), [schedulePost]);
+  const refresh = useCallback(() => schedulePost("refresh"), [schedulePost]);
 
   const setViewportSize = useCallback((width: number, height: number) => {
     viewportRef.current.viewportPx = { width, height };
@@ -135,5 +138,11 @@ export function useMapTiles({ postWorkerMessage }: UseMapTilesOptions) {
     };
   }, []);
 
-  return { viewportRef, postViewport, postRequestTiles, setViewportSize };
+  return {
+    viewportRef,
+    postViewport,
+    postRequestTiles,
+    setViewportSize,
+    refresh,
+  };
 }

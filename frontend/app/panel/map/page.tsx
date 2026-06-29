@@ -5,7 +5,7 @@ import type { MapCanvasHandle } from "./map-canvas";
 import type { RenderSettings } from "@/lib/map/tile-worker-protocol";
 import dynamic from "next/dynamic";
 import { type PropsWithChildren, useEffect, useRef, useState } from "react";
-import { House, MapPinned, Minus, Plus, Settings } from "lucide-react";
+import { House, MapPinned, Minus, Plus, RotateCw, Settings } from "lucide-react";
 import { SubPage } from "../sub-page";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Button } from "@/components/ui/button";
@@ -152,6 +152,13 @@ export default function ServerMap() {
           <span className={cn("ml-auto px-2 text-xs", googleSansCode.className)}>
             {coord ? `${coord.x.toFixed(0)} ${coord.z.toFixed(0)}` : ""}
           </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="cursor-pointer"
+            onClick={() => mapRef.current?.refresh()}>
+            <RotateCw />
+          </Button>
           <MapSettingsPopover
             settings={settings}
             onSettingsChange={handleSettingsChange}

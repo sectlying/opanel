@@ -2,6 +2,7 @@ import type {
   ChunksFlushMessage,
   InitMessage,
   MainToWorker,
+  RefreshMessage,
   RenderSettings,
   RequestTilesMessage,
   SetFpsReportingMessage,
@@ -61,6 +62,8 @@ class TileWorker {
           return this.handleViewport(data);
         case "requestTiles":
           return this.handleRequestTiles(data);
+        case "refresh":
+          return this.handleRefresh(data);
         case "chunksFlush":
           return this.handleChunksFlush(data);
       }
@@ -119,6 +122,17 @@ class TileWorker {
   }
 
   private handleRequestTiles({ viewport }: RequestTilesMessage) {
+    this.currentViewport = viewport;
+    this.render(viewport);
+    this.loadTilesInBounds(viewport);
+  }
+
+  private handleRefresh({ viewport }: RefreshMessage) {
+    this.tileCache.clear();
+    this.macroCanvases.clear();
+    this.inflight.clear();
+    this.inflightBundles.clear();
+
     this.currentViewport = viewport;
     this.render(viewport);
     this.loadTilesInBounds(viewport);
