@@ -101,7 +101,7 @@ const configurationGroupItems = [
   },
   {
     name: "OIDC",
-    url: "/panel/sso",
+    url: "/panel/oidc",
     icon: ShieldCheck
   }
 ];
