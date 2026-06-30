@@ -1,5 +1,6 @@
 "use client";
 
+import type { OidcConfigResponse } from "@/lib/types";
 import { useEffect, useState } from "react";
 import { ShieldCheck, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -9,32 +10,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { sendGetRequest, sendPostRequest, sendDeleteRequest, toastError } from "@/lib/api";
 import { ConfigItem, ConfigSection } from "@/components/config-item";
-import { useLoadingDone } from "@/hooks/use-loading-done";
-import type { OidcConfigResponse } from "@/lib/types";
+import { emitter } from "@/lib/emitter";
 
 export default function OIDCConfiguration() {
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [allowedUserIds, setAllowedUserIds] = useState<string[]>([]);
   const [newUserId, setNewUserId] = useState("");
 
-  const fetchOidcEnabled = async () => {
+  const fetchOidcStatus = async () => {
     try {
       const res = await sendGetRequest<OidcConfigResponse>("/api/auth/oidc/config", false);
       setEnabled(res.enabled);
-    } catch {
-      setEnabled(false);
-    }
-  };
-
-  const fetchAllowedUsers = async () => {
-    try {
-      const { allowedUserIds: ids } = await sendGetRequest<{ allowedUserIds: string[] }>("/api/auth/oidc/allowed-users");
-      setAllowedUserIds(ids ?? []);
+      if(res.enabled) {
+        const { allowedUserIds: ids } = await sendGetRequest<{ allowedUserIds: string[] }>("/api/auth/oidc/allowed-users");
+        setAllowedUserIds(ids ?? []);
+      }
     } catch (e: any) {
-      toastError(e, $("oidc.fetch.error"), [
+        toastError(e, $("oidc.fetch.error"), [
         [401, $("common.error.401")],
         [500, $("common.error.500")]
       ]);
+      setEnabled(false);
+    } finally {
+      emitter.emit("loading-done");
     }
   };
 
@@ -46,7 +44,7 @@ export default function OIDCConfiguration() {
       await sendPostRequest("/api/auth/oidc/allowed-users", { userId: trimmed });
       setNewUserId("");
       toast.success($("oidc.add.success"));
-      await fetchAllowedUsers();
+      await fetchOidcStatus();
     } catch (e: any) {
       toastError(e, $("oidc.add.error"), [
         [400, $("common.error.400")],
@@ -60,7 +58,7 @@ export default function OIDCConfiguration() {
     try {
       await sendDeleteRequest("/api/auth/oidc/allowed-users", { userId });
       toast.success($("oidc.remove.success"));
-      await fetchAllowedUsers();
+      await fetchOidcStatus();
     } catch (e: any) {
       toastError(e, $("oidc.remove.error"), [
         [400, $("common.error.400")],
@@ -71,17 +69,15 @@ export default function OIDCConfiguration() {
   };
 
   useEffect(() => {
-    fetchOidcEnabled();
-    fetchAllowedUsers();
+    fetchOidcStatus();
   }, []);
-
-  useLoadingDone();
 
   return (
     <SubPage
       title="OIDC"
+      subTitle="OIDC"
       description={$("oidc.description")}
-      category={$("sidebar.config")}
+      category={$("nav.settings")}
       icon={<ShieldCheck />}
       pageClassName="min-xl:px-64!">
       {enabled === false ? (

@@ -37,11 +37,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class OidcManager {
-
     private static final long STATE_MAX_AGE_MS = 10 * 60 * 1000; // 10 minutes
-
     private final ConcurrentHashMap<String, StateEntry> stateStore = new ConcurrentHashMap<>();
-
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "OPanel-OIDC-Cleanup");
         t.setDaemon(true);
@@ -66,7 +63,8 @@ public class OidcManager {
 
         JWKSource<SecurityContext> jwkSource = new RemoteJWKSet<>(metadata.getJWKSetURI().toURL());
         JWSKeySelector<SecurityContext> jwsKeySelector = new JWSVerificationKeySelector<>(
-                JWSAlgorithm.Family.SIGNATURE, jwkSource);
+                JWSAlgorithm.Family.SIGNATURE, jwkSource
+            );
         this.idTokenValidator = new IDTokenValidator(
                 metadata.getIssuer(),
                 new ClientID(clientId),
@@ -85,7 +83,7 @@ public class OidcManager {
      * Build the OIDC authorization URL and generate a state value.
      */
     public String buildAuthorizationUrl(String clientId, String redirectUri) throws Exception {
-        if (!discovered || providerMetadata == null) {
+        if(!discovered || providerMetadata == null) {
             throw new IllegalStateException("OIDC provider has not been discovered yet");
         }
 
@@ -111,27 +109,27 @@ public class OidcManager {
      * Process the OIDC callback: validate state, exchange code for tokens, validate the ID token.
      */
     public JWTClaimsSet handleCallback(String callbackUrl, String clientId, String clientSecret, String redirectUri) throws Exception {
-        if (!discovered || providerMetadata == null) {
+        if(!discovered || providerMetadata == null) {
             throw new IllegalStateException("OIDC provider has not been discovered yet");
         }
 
         AuthenticationResponse authResponse = AuthenticationResponseParser.parse(new URI(callbackUrl));
 
-        if (!authResponse.indicatesSuccess()) {
+        if(!authResponse.indicatesSuccess()) {
             throw new RuntimeException("OIDC authentication failed: " + authResponse.toErrorResponse().getErrorObject().getDescription());
         }
 
         State responseState = authResponse.getState();
-        if (responseState == null) {
+        if(responseState == null) {
             throw new RuntimeException("Missing state parameter in OIDC callback");
         }
 
         StateEntry stateEntry = stateStore.remove(responseState.getValue());
-        if (stateEntry == null) {
+        if(stateEntry == null) {
             throw new RuntimeException("Invalid or expired state parameter in OIDC callback");
         }
 
-        if (System.currentTimeMillis() - stateEntry.timestamp > STATE_MAX_AGE_MS) {
+        if(System.currentTimeMillis() - stateEntry.timestamp > STATE_MAX_AGE_MS) {
             throw new RuntimeException("OIDC state parameter has expired");
         }
 
@@ -141,7 +139,7 @@ public class OidcManager {
         ClientID clientIDObj = new ClientID(clientId);
         URI redirectUriObj = new URI(redirectUri);
 
-        if (clientSecret != null && !clientSecret.isEmpty()) {
+        if(clientSecret != null && !clientSecret.isEmpty()) {
             ClientAuthentication clientAuth = new ClientSecretBasic(clientIDObj, new Secret(clientSecret));
             tokenRequest = new TokenRequest(
                     providerMetadata.getTokenEndpointURI(),
@@ -156,7 +154,7 @@ public class OidcManager {
 
         TokenResponse tokenResponse = OIDCTokenResponseParser.parse(tokenRequest.toHTTPRequest().send());
 
-        if (!tokenResponse.indicatesSuccess()) {
+        if(!tokenResponse.indicatesSuccess()) {
             throw new RuntimeException("OIDC token request failed: " + tokenResponse.toErrorResponse().getErrorObject().getDescription());
         }
 
@@ -165,7 +163,7 @@ public class OidcManager {
 
         IDTokenClaimsSet claimsSet = idTokenValidator.validate(idToken, null);
 
-        if (claimsSet.getNonce() == null || !claimsSet.getNonce().getValue().equals(stateEntry.nonce)) {
+        if(claimsSet.getNonce() == null || !claimsSet.getNonce().getValue().equals(stateEntry.nonce)) {
             throw new RuntimeException("Nonce mismatch in OIDC ID token");
         }
 

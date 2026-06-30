@@ -645,6 +645,7 @@
   "settings.system.mcp": "MCP-Server",
   "settings.system.mcp.description": "Konfigurieren Sie den MCP-Server, um großen Sprachmodellen die Steuerung von OPanel zu ermöglichen",
   "settings.system.mcp.configure": "Konfigurieren",
+  "settings.system.oidc.configure": "Konfigurieren",
   "settings.system.access-key": "Zugriffsschlüssel",
   "settings.system.access-key.modify": "Ändern",
   "settings.system.check-update": "Auf Updates prüfen",

@@ -645,6 +645,7 @@
   "settings.system.mcp": "MCPサーバー",
   "settings.system.mcp.description": "MCPサーバーを配置して、大規模モデルによるOPanelの操作を実現する",
   "settings.system.mcp.configure": "配置",
+  "settings.system.oidc.configure": "設定",
   "settings.system.access-key": "アクセスキー",
   "settings.system.access-key.modify": "修正",
   "settings.system.check-update": "アップデートを確認",

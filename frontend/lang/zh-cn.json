@@ -645,6 +645,7 @@
   "settings.system.mcp": "MCP服务器",
   "settings.system.mcp.description": "配置MCP服务器，以实现大模型对OPanel的操作",
   "settings.system.mcp.configure": "配置",
+  "settings.system.oidc.configure": "配置",
   "settings.system.access-key": "访问密钥",
   "settings.system.access-key.modify": "修改",
   "settings.system.check-update": "检查更新",

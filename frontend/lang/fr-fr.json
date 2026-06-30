@@ -645,6 +645,7 @@
   "settings.system.mcp": "Serveur MCP",
   "settings.system.mcp.description": "Configurer le serveur MCP pour permettre aux grands modèles de langage de contrôler OPanel",
   "settings.system.mcp.configure": "Configurer",
+  "settings.system.oidc.configure": "Configurer",
   "settings.system.access-key": "Clé d'accès",
   "settings.system.access-key.modify": "Modifier",
   "settings.system.check-update": "Vérifier les mises à jour",

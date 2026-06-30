@@ -645,6 +645,7 @@
   "settings.system.mcp": "MCP Server",
   "settings.system.mcp.description": "Configure the MCP server so LLMs can get access to OPanel",
   "settings.system.mcp.configure": "Configure",
+  "settings.system.oidc.configure": "Configure",
   "settings.system.access-key": "Access Key",
   "settings.system.access-key.modify": "Modify",
   "settings.system.check-update": "Check for Updates",

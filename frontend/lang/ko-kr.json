@@ -645,6 +645,7 @@
   "settings.system.mcp": "MCP 서버",
   "settings.system.mcp.description": "대형 언어 모델이 OPanel을 제어할 수 있도록 MCP 서버를 구성합니다",
   "settings.system.mcp.configure": "구성",
+  "settings.system.oidc.configure": "구성",
   "settings.system.access-key": "액세스 키",
   "settings.system.access-key.modify": "수정",
   "settings.system.check-update": "업데이트 확인",
