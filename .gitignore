@@ -6,11 +6,20 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-/node_modules/
+node_modules/
 /package.json
 /package-lock.json
 /frontend/assets/minecraft
 /target
+
+### Frontend ###
+frontend/.next/
+frontend/out/
+frontend/.env
+frontend/.env.*
+
+### Frontend build artifacts (bundled into jar) ###
+core/src/main/resources/web/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
@@ -26,6 +35,9 @@ out/
 !**/src/test/**/out/
 /src/
 
+### VS Code ###
+.vscode/
+
 ### Eclipse ###
 .apt_generated
 .classpath
@@ -37,6 +49,9 @@ out/
 bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
+
+### Logs ###
+*.log
 
 ### Mac OS ###
 .DS_Store

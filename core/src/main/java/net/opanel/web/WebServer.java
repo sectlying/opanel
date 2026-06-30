@@ -142,6 +142,9 @@ public class WebServer {
                 get("oidc/callback", oidcController.callback);
                 post("oidc/verify-secret", oidcController.verifySecret);
                 get("oidc/config", oidcController.getConfig);
+                get("oidc/allowed-users", oidcController.getAllowedUsers);
+                post("oidc/allowed-users", oidcController.addAllowedUser);
+                delete("oidc/allowed-users", oidcController.removeAllowedUser);
             });
             path("banned-ips", () -> {
                 get("/", bannedIpsController.getBannedIps);

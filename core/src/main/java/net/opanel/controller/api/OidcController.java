@@ -36,10 +36,9 @@ public class OidcController extends BaseController {
     private void ensureInitialized() throws Exception {
         if (initialized && oidcManager.isDiscovered()) return;
 
-        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
-        if (oidcConfig == null || !oidcConfig.enabled) return;
+        if (!plugin.getConfig().oidcEnabled) return;
 
-        oidcManager.discover(oidcConfig.discoveryUrl, oidcConfig.clientId);
+        oidcManager.discover(plugin.getConfig().oidcDiscoveryUrl, plugin.getConfig().oidcClientId);
         initialized = true;
     }
 
@@ -48,8 +47,7 @@ public class OidcController extends BaseController {
      * Redirects the user to the OIDC provider's authorization endpoint.
      */
     public Handler login = ctx -> {
-        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
-        if (oidcConfig == null || !oidcConfig.enabled) {
+        if (!plugin.getConfig().oidcEnabled) {
             sendResponse(ctx, HttpStatus.SERVICE_UNAVAILABLE, "OIDC is not enabled.");
             return;
         }
@@ -64,7 +62,7 @@ public class OidcController extends BaseController {
 
         try {
             String redirectUri = buildRedirectUri(ctx);
-            String authUrl = oidcManager.buildAuthorizationUrl(oidcConfig.clientId, redirectUri);
+            String authUrl = oidcManager.buildAuthorizationUrl(plugin.getConfig().oidcClientId, redirectUri);
             ctx.redirect(authUrl, HttpStatus.FOUND);
         } catch (Exception e) {
             e.printStackTrace();
@@ -78,8 +76,7 @@ public class OidcController extends BaseController {
      * and either logs the user in or redirects to the bind page.
      */
     public Handler callback = ctx -> {
-        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
-        if (oidcConfig == null || !oidcConfig.enabled) {
+        if (!plugin.getConfig().oidcEnabled) {
             sendResponse(ctx, HttpStatus.SERVICE_UNAVAILABLE, "OIDC is not enabled.");
             return;
         }
@@ -97,7 +94,7 @@ public class OidcController extends BaseController {
 
         JWTClaimsSet claims;
         try {
-            claims = oidcManager.handleCallback(callbackUrl, oidcConfig.clientId, oidcConfig.clientSecret, redirectUri);
+            claims = oidcManager.handleCallback(callbackUrl, plugin.getConfig().oidcClientId, plugin.getConfig().oidcClientSecret, redirectUri);
         } catch (Exception e) {
             e.printStackTrace();
             ctx.redirect("/login?oidc-error=true", HttpStatus.FOUND);
@@ -111,7 +108,8 @@ public class OidcController extends BaseController {
         }
 
         // Check if this user ID is in the allowed list
-        if (oidcConfig.allowedUserIds != null && oidcConfig.allowedUserIds.contains(userId)) {
+        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
+        if (oidcConfig != null && oidcConfig.allowedUserIds != null && oidcConfig.allowedUserIds.contains(userId)) {
             // User is allowed - issue JWT and redirect to dashboard
             String token = JwtManager.generateToken(plugin.getConfig().accessKey, plugin.getConfig().salt);
             try {
@@ -137,8 +135,7 @@ public class OidcController extends BaseController {
      * If the key matches, adds the user ID to allowed-user-ids and issues a JWT.
      */
     public Handler verifySecret = ctx -> {
-        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
-        if (oidcConfig == null || !oidcConfig.enabled) {
+        if (!plugin.getConfig().oidcEnabled) {
             sendResponse(ctx, HttpStatus.SERVICE_UNAVAILABLE, "OIDC is not enabled.");
             return;
         }
@@ -181,6 +178,10 @@ public class OidcController extends BaseController {
         failedVerifyRecords.remove(reqIp);
 
         // Add the user ID to allowed-user-ids
+        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
+        if (oidcConfig == null) {
+            oidcConfig = new OidcConfiguration();
+        }
         if (oidcConfig.allowedUserIds == null) {
             oidcConfig.allowedUserIds = new java.util.ArrayList<>();
         }
@@ -206,15 +207,77 @@ public class OidcController extends BaseController {
      * Returns the OIDC configuration for the frontend to adjust the login UI.
      */
     public Handler getConfig = ctx -> {
-        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
-
         HashMap<String, Object> res = new HashMap<>();
-        if (oidcConfig != null && oidcConfig.enabled) {
+        if (plugin.getConfig().oidcEnabled) {
             res.put("enabled", true);
-            res.put("displayName", oidcConfig.displayName);
+            res.put("displayName", plugin.getConfig().oidcDisplayName);
         } else {
             res.put("enabled", false);
         }
+        sendResponse(ctx, res);
+    };
+
+    /**
+     * GET /api/auth/oidc/allowed-users
+     * Returns the list of allowed OIDC user IDs.
+     */
+    public Handler getAllowedUsers = ctx -> {
+        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
+        HashMap<String, Object> res = new HashMap<>();
+        res.put("allowedUserIds", oidcConfig != null && oidcConfig.allowedUserIds != null ? oidcConfig.allowedUserIds : new java.util.ArrayList<>());
+        sendResponse(ctx, res);
+    };
+
+    /**
+     * POST /api/auth/oidc/allowed-users
+     * Adds a user ID to the allowed list.
+     */
+    public Handler addAllowedUser = ctx -> {
+        RequestBodyType reqBody = ctx.bodyAsClass(RequestBodyType.class);
+        if (reqBody == null || reqBody.userId == null || reqBody.userId.isBlank()) {
+            sendResponse(ctx, HttpStatus.BAD_REQUEST, "User ID is missing.");
+            return;
+        }
+
+        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
+        if (oidcConfig == null) {
+            oidcConfig = new OidcConfiguration();
+        }
+        if (oidcConfig.allowedUserIds == null) {
+            oidcConfig.allowedUserIds = new java.util.ArrayList<>();
+        }
+        if (!oidcConfig.allowedUserIds.contains(reqBody.userId)) {
+            oidcConfig.allowedUserIds.add(reqBody.userId);
+            Storage.get().setStoredData(StorageKey.OIDC_CONFIG, oidcConfig);
+        }
+
+        HashMap<String, Object> res = new HashMap<>();
+        res.put("allowedUserIds", oidcConfig.allowedUserIds);
+        sendResponse(ctx, res);
+    };
+
+    /**
+     * DELETE /api/auth/oidc/allowed-users
+     * Removes a user ID from the allowed list.
+     */
+    public Handler removeAllowedUser = ctx -> {
+        RequestBodyType reqBody = ctx.bodyAsClass(RequestBodyType.class);
+        if (reqBody == null || reqBody.userId == null || reqBody.userId.isBlank()) {
+            sendResponse(ctx, HttpStatus.BAD_REQUEST, "User ID is missing.");
+            return;
+        }
+
+        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
+        if (oidcConfig == null || oidcConfig.allowedUserIds == null) {
+            sendResponse(ctx, HttpStatus.BAD_REQUEST, "No allowed users.");
+            return;
+        }
+
+        oidcConfig.allowedUserIds.remove(reqBody.userId);
+        Storage.get().setStoredData(StorageKey.OIDC_CONFIG, oidcConfig);
+
+        HashMap<String, Object> res = new HashMap<>();
+        res.put("allowedUserIds", oidcConfig.allowedUserIds);
         sendResponse(ctx, res);
     };
 
@@ -226,6 +289,7 @@ public class OidcController extends BaseController {
 
     private static class RequestBodyType {
         String accessKey; // hashed 2
+        String userId;
     }
 
     private boolean checkTemporaryBan(String ip) {

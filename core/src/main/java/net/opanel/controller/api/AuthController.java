@@ -5,9 +5,6 @@ import io.javalin.http.Handler;
 import io.javalin.http.HttpStatus;
 
 import net.opanel.OPanel;
-import net.opanel.config.OidcConfiguration;
-import net.opanel.storage.Storage;
-import net.opanel.storage.StorageKey;
 import net.opanel.utils.Utils;
 import net.opanel.controller.BaseController;
 import net.opanel.web.JwtManager;
@@ -29,8 +26,7 @@ public class AuthController extends BaseController {
     }
 
     private boolean isOidcEnabled() {
-        OidcConfiguration oidcConfig = Storage.get().getStoredData(StorageKey.OIDC_CONFIG);
-        return oidcConfig != null && oidcConfig.enabled;
+        return plugin.getConfig().oidcEnabled;
     }
 
     public Handler getCram = ctx -> {

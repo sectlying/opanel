@@ -47,7 +47,7 @@ public class Storage {
         registeredStorageFiles.put(StorageKey.OIDC_CONFIG, new StorageFile<>(
             "oidc-config.json",
             OidcConfiguration.class,
-            new OidcConfiguration(false)
+            new OidcConfiguration()
         ));
     }
 
