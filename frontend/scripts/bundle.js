@@ -4,6 +4,6 @@ const path = require("path");
 const distDir = path.resolve(process.cwd(), "build");
 const targetDir = path.resolve(process.cwd(), "../core/src/main/resources/web");
 
-fs.rmSync(targetDir, { recursive: true });
+fs.rmSync(targetDir, { recursive: true, force: true });
 fs.mkdirSync(targetDir);
 fs.cpSync(distDir, targetDir, { recursive: true });
