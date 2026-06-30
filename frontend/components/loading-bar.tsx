@@ -1,12 +1,14 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { emitter } from "@/lib/emitter";
 
 const DURATION = 300;
 const INITIAL_PROGRESS = 15;
+const FINAL_PROGRESS = 80;
+const PROGRESS_STEP = 10;
 const UPDATE_INTERVAL_MS = 700;
 
 export function LoadingBar() {
@@ -31,7 +33,7 @@ export function LoadingBar() {
     );
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if(neverMountedRef.current) {
       neverMountedRef.current = false;
       return;
@@ -43,7 +45,7 @@ export function LoadingBar() {
     setVisible(true);
     setProgress(INITIAL_PROGRESS);
     timerRef.current = setInterval(() => {
-      setProgress((prev) => prev >= 80 ? prev : prev + 10);
+      setProgress((prev) => prev >= FINAL_PROGRESS ? prev : prev + PROGRESS_STEP);
     }, UPDATE_INTERVAL_MS);
 
     return () => {
