@@ -58,7 +58,7 @@ public class OidcManager {
      * Perform OpenID Connect Discovery and cache the provider metadata.
      */
     public void discover(String discoveryUrl, String clientId) throws Exception {
-        Issuer issuer = new Issuer(discoveryUrl.replaceAll("/+$", ""));
+        Issuer issuer = new Issuer(discoveryUrl);
         OIDCProviderMetadata metadata = OIDCProviderMetadata.resolve(issuer);
         this.providerMetadata = metadata;
 
