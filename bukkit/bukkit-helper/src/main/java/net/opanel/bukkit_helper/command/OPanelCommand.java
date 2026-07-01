@@ -49,6 +49,7 @@ public class OPanelCommand implements CommandExecutor, TabCompleter {
                     }
                 }
             }
+            case "restart-server" -> instance.getServer().restart();
         }
         return true;
     }
@@ -56,6 +57,6 @@ public class OPanelCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if(args.length != 1) return List.of();
-        return List.of("about", "status", "start", "stop");
+        return List.of("about", "status", "start", "stop", "restart-server");
     }
 }
