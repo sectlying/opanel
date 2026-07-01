@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Blocks, Gauge, Info, Unplug, Users } from "lucide-react";
+import { Blocks, Gauge, Info, ScrollText, Unplug, Users } from "lucide-react";
 import { SubPage } from "../sub-page";
 import { $ } from "@/lib/i18n";
 import { ConfigItem, ConfigSection } from "@/components/config-item";
@@ -150,6 +150,7 @@ export default function OpenAPI() {
     isBanned: boolean
     gamemode: "adventure" | "creative" | "survival" | "spectator"
     banReason?: string
+    ping?: number
   }[]
 }`}/>
             </Interface>
@@ -167,6 +168,34 @@ export default function OpenAPI() {
   isBanned: boolean
   gamemode: "adventure" | "creative" | "survival" | "spectator"
   banReason?: string
+  ping?: number
+}`}/>
+            </Interface>
+          </InterfaceSection>
+          <InterfaceSection interfaceName="logs" icon={ScrollText}>
+            <Interface method="GET" route="/open-api/logs">
+              <InterfaceDescription>
+                {$("open-api.interfaces.logs.description")}
+              </InterfaceDescription>
+              <InterfaceRequest def={`{}`}/>
+              <InterfaceResponse def={`{
+  logs: string[]
+}`}/>
+            </Interface>
+            <Interface method="GET" route="/open-api/logs/{fileName}">
+              <InterfaceDescription>
+                {$("open-api.interfaces.log.description")}
+              </InterfaceDescription>
+              <InterfaceRequest def={`{
+  fileName: string // path param
+}`}/>
+            </Interface>
+            <Interface method="GET" route="/open-api/logs/{fileName}/download">
+              <InterfaceDescription>
+                {$("open-api.interfaces.log-download.description")}
+              </InterfaceDescription>
+              <InterfaceRequest def={`{
+  fileName: string // path param
 }`}/>
             </Interface>
           </InterfaceSection>
@@ -175,4 +204,3 @@ export default function OpenAPI() {
     </SubPage>
   );
 }
-

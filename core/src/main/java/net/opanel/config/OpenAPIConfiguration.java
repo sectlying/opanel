@@ -7,7 +7,8 @@ public class OpenAPIConfiguration {
         "info",
         "monitor",
         "plugins",
-        "players"
+        "players",
+        "logs"
     };
 
     public boolean enabled;

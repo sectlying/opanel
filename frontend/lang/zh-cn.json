@@ -560,6 +560,10 @@
   "open-api.interfaces.players": "玩家信息",
   "open-api.interfaces.players.description": "获取服务器玩家列表。",
   "open-api.interfaces.player.description": "获取某个玩家的详细信息。",
+  "open-api.interfaces.logs": "日志信息",
+  "open-api.interfaces.logs.description": "获取日志文件名列表。",
+  "open-api.interfaces.log.description": "获取日志文件内容。",
+  "open-api.interfaces.log-download.description": "下载日志文件。",
 
   "bukkit-config.title": "Bukkit 配置",
   "bukkit-config.description": "编辑Bukkit的服务端配置文件",
