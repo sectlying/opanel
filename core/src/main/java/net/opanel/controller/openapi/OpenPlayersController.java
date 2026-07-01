@@ -25,7 +25,12 @@ public class OpenPlayersController extends BaseController {
                     playerObj.put("isOnline", player.isOnline());
                     playerObj.put("isBanned", player.isBanned());
                     playerObj.put("gamemode", player.getGameMode().getName());
-                    playerObj.put("banReason", player.getBanReason());
+                    if(player.isBanned()) {
+                        playerObj.put("banReason", player.getBanReason());
+                    }
+                    if(player.isOnline()) {
+                        playerObj.put("ping", player.getPing());
+                    }
                     return playerObj;
                 })
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
@@ -48,7 +53,12 @@ public class OpenPlayersController extends BaseController {
         obj.put("isOnline", player.isOnline());
         obj.put("isBanned", player.isBanned());
         obj.put("gamemode", player.getGameMode().getName());
-        obj.put("banReason", player.getBanReason());
+        if(player.isBanned()) {
+            obj.put("banReason", player.getBanReason());
+        }
+        if(player.isOnline()) {
+            obj.put("ping", player.getPing());
+        }
         sendResponse(ctx, obj);
     };
 }

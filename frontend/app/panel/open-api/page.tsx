@@ -150,6 +150,7 @@ export default function OpenAPI() {
     isBanned: boolean
     gamemode: "adventure" | "creative" | "survival" | "spectator"
     banReason?: string
+    ping?: number
   }[]
 }`}/>
             </Interface>
@@ -167,6 +168,7 @@ export default function OpenAPI() {
   isBanned: boolean
   gamemode: "adventure" | "creative" | "survival" | "spectator"
   banReason?: string
+  ping?: number
 }`}/>
             </Interface>
           </InterfaceSection>
