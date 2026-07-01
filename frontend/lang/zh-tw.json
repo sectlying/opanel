@@ -583,6 +583,10 @@
   "open-api.interfaces.players": "玩家資訊",
   "open-api.interfaces.players.description": "取得伺服器玩家列表。",
   "open-api.interfaces.player.description": "取得某位玩家的詳細資訊。",
+  "open-api.interfaces.logs": "日誌資訊",
+  "open-api.interfaces.logs.description": "取得日誌檔案名稱列表。",
+  "open-api.interfaces.log.description": "取得日誌檔案內容。",
+  "open-api.interfaces.log-download.description": "下載日誌檔案。",
 
   "bukkit-config.title": "Bukkit 設定",
   "bukkit-config.description": "編輯Bukkit的服務端配置文件",

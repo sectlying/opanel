@@ -583,6 +583,10 @@
   "open-api.interfaces.players": "Spielerinformationen",
   "open-api.interfaces.players.description": "Spielerliste des Servers abrufen.",
   "open-api.interfaces.player.description": "Detaillierte Informationen zu einem bestimmten Spieler abrufen.",
+  "open-api.interfaces.logs": "Protokollinformationen",
+  "open-api.interfaces.logs.description": "Liste der Protokolldateinamen abrufen.",
+  "open-api.interfaces.log.description": "Inhalt einer Protokolldatei abrufen.",
+  "open-api.interfaces.log-download.description": "Protokolldatei herunterladen.",
 
   "bukkit-config.title": "Bukkit-Konfiguration",
   "bukkit-config.description": "Bearbeiten Sie die auf Bukkit basierenden Serverkonfigurationsdateien",

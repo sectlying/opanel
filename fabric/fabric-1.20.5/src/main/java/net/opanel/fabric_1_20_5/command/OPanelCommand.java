@@ -73,6 +73,13 @@ public class OPanelCommand implements CommandRegistrationCallback {
                                             return 1;
                                         })
                         )
+                        .then(
+                                literal("restart-server")
+                                        .executes(ctx -> {
+                                            instance.getServer().restart();
+                                            return 1;
+                                        })
+                        )
         );
     }
 }

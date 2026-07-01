@@ -14,7 +14,7 @@ import { sendGetRequest, sendPostRequest, toastError } from "@/lib/api";
 
 const MonacoEditor = dynamic(() => import("@/components/monaco-editor"), { ssr: false });
 
-export type OpenAPIInterfaceName = "info" | "monitor" | "plugins" | "players";
+export type OpenAPIInterfaceName = "info" | "monitor" | "plugins" | "players" | "logs";
 
 export function InterfaceSection({
   interfaceName,

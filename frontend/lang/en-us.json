@@ -583,6 +583,10 @@
   "open-api.interfaces.players": "Players",
   "open-api.interfaces.players.description": "Get the player list.",
   "open-api.interfaces.player.description": "Get detailed information of a specific player.",
+  "open-api.interfaces.logs": "Logs",
+  "open-api.interfaces.logs.description": "Get the list of log file names.",
+  "open-api.interfaces.log.description": "Get the content of a log file.",
+  "open-api.interfaces.log-download.description": "Download a log file.",
 
   "bukkit-config.title": "Bukkit Configurations",
   "bukkit-config.description": "Edit the Bukkit configuration files",

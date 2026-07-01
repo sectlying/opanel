@@ -583,6 +583,10 @@
   "open-api.interfaces.players": "플레이어 정보",
   "open-api.interfaces.players.description": "서버의 플레이어 목록을 가져옵니다.",
   "open-api.interfaces.player.description": "특정 플레이어의 상세 정보를 가져옵니다.",
+  "open-api.interfaces.logs": "로그 정보",
+  "open-api.interfaces.logs.description": "로그 파일 이름 목록을 가져옵니다.",
+  "open-api.interfaces.log.description": "로그 파일 내용을 가져옵니다.",
+  "open-api.interfaces.log-download.description": "로그 파일을 다운로드합니다.",
 
   "bukkit-config.title": "Bukkit 설정",
   "bukkit-config.description": "Bukkit 기반의 서버 구성 파일을 수정합니다",

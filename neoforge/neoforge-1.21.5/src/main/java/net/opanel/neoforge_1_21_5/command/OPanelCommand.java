@@ -75,6 +75,13 @@ public class OPanelCommand {
                                             return 1;
                                         })
                         )
+                        .then(
+                                literal("restart-server")
+                                        .executes(ctx -> {
+                                            instance.getServer().restart();
+                                            return 1;
+                                        })
+                        )
         );
     }
 }

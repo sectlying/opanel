@@ -583,6 +583,10 @@
   "open-api.interfaces.players": "Informations des joueurs",
   "open-api.interfaces.players.description": "Obtenir la liste des joueurs du serveur.",
   "open-api.interfaces.player.description": "Obtenir des informations détaillées sur un joueur spécifique.",
+  "open-api.interfaces.logs": "Journaux",
+  "open-api.interfaces.logs.description": "Obtenir la liste des noms des fichiers journaux.",
+  "open-api.interfaces.log.description": "Obtenir le contenu d'un fichier journal.",
+  "open-api.interfaces.log-download.description": "Télécharger un fichier journal.",
 
   "bukkit-config.title": "Configuration Bukkit",
   "bukkit-config.description": "Modifier les fichiers de configuration du serveur basés sur Bukkit",

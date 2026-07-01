@@ -37,6 +37,7 @@ import { Text } from "@/components/i18n-text";
 import { useKeydown } from "@/hooks/use-keydown";
 import { useCheckAuth } from "@/hooks/use-check-auth";
 import { doAutoUpdateCheck, resetUpdateCheckInfo } from "@/lib/update";
+<<<<<<< HEAD
 import { useLoadingDone } from "@/hooks/use-loading-done";
 import { OidcBindDialog } from "./oidc-bind-dialog";
 
@@ -47,6 +48,9 @@ function LoginContent() {
     </Suspense>
   );
 }
+=======
+import { emitter } from "@/lib/emitter";
+>>>>>>> upstream/main
 
 const formSchema = z.object({
   accessKey: z.string().nonempty($("login.form.input.empty")),
@@ -127,20 +131,30 @@ function LoginForm() {
     }
   };
 
+<<<<<<< HEAD
   const handleOidcLogin = () => {
     window.location.href = apiUrl + "/api/auth/oidc/login";
   };
 
   useCheckAuth(() => push("/panel/dashboard"));
+=======
+  useCheckAuth(
+    () => push("/panel/dashboard"),
+    () => emitter.emit("loading-done")
+  );
+>>>>>>> upstream/main
 
   useKeydown("Enter", {}, () => {
     if(!oidcConfig?.enabled) handleLogin();
   });
 
+<<<<<<< HEAD
   useLoadingDone();
 
   const isOidc = oidcConfig?.enabled;
 
+=======
+>>>>>>> upstream/main
   return (
     <div className="flex flex-col">
       <div className="flex flex-col items-center gap-8 mb-8">

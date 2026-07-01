@@ -12,10 +12,7 @@ import net.opanel.controller.BaseController;
 import net.opanel.controller.BeforeController;
 import net.opanel.controller.ErrorController;
 import net.opanel.controller.api.*;
-import net.opanel.controller.openapi.OpenInfoController;
-import net.opanel.controller.openapi.OpenMonitorController;
-import net.opanel.controller.openapi.OpenPlayersController;
-import net.opanel.controller.openapi.OpenPluginsController;
+import net.opanel.controller.openapi.*;
 import net.opanel.endpoint.InventoryEndpoint;
 import net.opanel.endpoint.MapEndpoint;
 import net.opanel.endpoint.PlayersEndpoint;
@@ -263,6 +260,7 @@ public class WebServer {
         OpenMonitorController openMonitorController = new OpenMonitorController(plugin);
         OpenPluginsController openPluginsController = new OpenPluginsController(plugin);
         OpenPlayersController openPlayersController = new OpenPlayersController(plugin);
+        OpenLogsController openLogsController = new OpenLogsController(plugin);
 
         // Open API Routes
         app.routes(() -> path("open-api", () -> {
@@ -277,6 +275,11 @@ public class WebServer {
             path("players", () -> {
                 get("/", openPlayersController.getPlayers);
                 get("/{uuid}", openPlayersController.getPlayerInfo);
+            });
+            path("logs", () -> {
+                get("/", openLogsController.getLogFileList);
+                get("{fileName}", openLogsController.getLogContent);
+                get("{fileName}/download", openLogsController.downloadLog);
             });
         }));
 

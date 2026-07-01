@@ -583,6 +583,10 @@
   "open-api.interfaces.players": "プレイヤー情報",
   "open-api.interfaces.players.description": "サーバーのプレイヤーリストを取得する。",
   "open-api.interfaces.player.description": "あるプレイヤーの詳細情報を取得する。",
+  "open-api.interfaces.logs": "ログ情報",
+  "open-api.interfaces.logs.description": "ログファイル名のリストを取得する。",
+  "open-api.interfaces.log.description": "ログファイルの内容を取得する。",
+  "open-api.interfaces.log-download.description": "ログファイルをダウンロードする。",
 
   "bukkit-config.title": "Bukkit 設定",
   "bukkit-config.description": "Bukkitのサーバー設定ファイルを編集する",
