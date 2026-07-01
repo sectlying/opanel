@@ -37,9 +37,8 @@ import { Text } from "@/components/i18n-text";
 import { useKeydown } from "@/hooks/use-keydown";
 import { useCheckAuth } from "@/hooks/use-check-auth";
 import { doAutoUpdateCheck, resetUpdateCheckInfo } from "@/lib/update";
-<<<<<<< HEAD
-import { useLoadingDone } from "@/hooks/use-loading-done";
 import { OidcBindDialog } from "./oidc-bind-dialog";
+import { emitter } from "@/lib/emitter";
 
 function LoginContent() {
   return (
@@ -48,9 +47,6 @@ function LoginContent() {
     </Suspense>
   );
 }
-=======
-import { emitter } from "@/lib/emitter";
->>>>>>> upstream/main
 
 const formSchema = z.object({
   accessKey: z.string().nonempty($("login.form.input.empty")),
@@ -77,26 +73,15 @@ function LoginForm() {
   const [oidcBindOpen, setOidcBindOpen] = useState<boolean>(false);
   const [oidcError, setOidcError] = useState<boolean>(false);
 
-  // Fetch OIDC config on mount
-  useEffect(() => {
-    sendGetRequest<OidcConfigResponse>("/api/auth/oidc/config", false)
-      .then((res) => {
-        setOidcConfig({ enabled: res.enabled, displayName: res.displayName });
-      })
-      .catch(() => {
-        setOidcConfig({ enabled: false });
-      });
-  }, []);
-
-  // Handle OIDC callback query params
-  useEffect(() => {
-    if(searchParams.get("oidc-error") === "true") {
-      setOidcError(true);
+  // Fetch OIDC config
+  const fetchOidcConfig = async () => {
+    try {
+      const res = await sendGetRequest<OidcConfigResponse>("/api/auth/oidc/config", false);
+      setOidcConfig({ enabled: res.enabled, displayName: res.displayName });
+    } catch {
+      setOidcConfig({ enabled: false });
     }
-    if(searchParams.get("oidc-bind") === "true") {
-      setOidcBindOpen(true);
-    }
-  }, [searchParams]);
+  };
 
   const handleLogin = async () => {
     const accessKey = form.getValues("accessKey"); // hashed 0
@@ -131,30 +116,36 @@ function LoginForm() {
     }
   };
 
-<<<<<<< HEAD
   const handleOidcLogin = () => {
     window.location.href = apiUrl + "/api/auth/oidc/login";
   };
 
-  useCheckAuth(() => push("/panel/dashboard"));
-=======
+  // Fetch OIDC config on mount
+  useEffect(() => {
+    fetchOidcConfig();
+  }, []);
+
+  // Handle OIDC callback query params
+  useEffect(() => {
+    if(searchParams.get("oidc-error") === "true") {
+      setOidcError(true);
+    }
+    if(searchParams.get("oidc-bind") === "true") {
+      setOidcBindOpen(true);
+    }
+  }, [searchParams]);
+
   useCheckAuth(
     () => push("/panel/dashboard"),
     () => emitter.emit("loading-done")
   );
->>>>>>> upstream/main
 
   useKeydown("Enter", {}, () => {
     if(!oidcConfig?.enabled) handleLogin();
   });
 
-<<<<<<< HEAD
-  useLoadingDone();
-
   const isOidc = oidcConfig?.enabled;
 
-=======
->>>>>>> upstream/main
   return (
     <div className="flex flex-col">
       <div className="flex flex-col items-center gap-8 mb-8">
@@ -167,7 +158,11 @@ function LoginForm() {
             <KeyRound />
             <span>{$("login.form.title")}</span>
           </CardTitle>
-          {!isOidc && (
+          {isOidc ? (
+            <CardDescription>
+              {$("login.form.oidc-description", oidcConfig.displayName || "OIDC")}
+            </CardDescription>
+          ) : (
             <CardDescription>
               {$("login.form.description")}
             </CardDescription>

@@ -113,7 +113,7 @@ public class OidcController extends BaseController {
         }
     };
 
-    public Handler verifySecret = ctx -> {
+    public Handler bindNewUser = ctx -> {
         if(!plugin.getConfig().oidcEnabled) {
             sendResponse(ctx, HttpStatus.SERVICE_UNAVAILABLE, "OIDC is not enabled.");
             return;

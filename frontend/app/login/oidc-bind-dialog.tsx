@@ -40,7 +40,7 @@ export function OidcBindDialog({
     const hashedKey = md5(md5(accessKey)); // hashed 2
 
     try {
-      await sendPostRequest("/api/auth/oidc/verify-secret", { accessKey: hashedKey });
+      await sendPostRequest("/api/auth/oidc/bind-user", { accessKey: hashedKey });
       resetUpdateCheckInfo();
       doAutoUpdateCheck();
       onOpenChange(false);

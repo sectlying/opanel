@@ -56,6 +56,7 @@
   "login.form.input.incorrect": "Incorrect access key",
   "login.form.input.temporarily-banned": "Too many verification attempts. Please try again later.",
   "login.form.enter": "Login",
+  "login.form.oidc-description": "Use {0} single sign-on to access the OPanel dashboard.",
   "login.footer.about": "About",
   "login.reset.title": "Reset the Key",
   "login.reset.content.line1": "If you are a server administrator and the key has been lost, you can reset the key by @b{action1} and @b{action2}.",

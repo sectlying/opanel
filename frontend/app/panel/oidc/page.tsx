@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { sendGetRequest, sendPostRequest, sendDeleteRequest, toastError } from "@/lib/api";
 import { ConfigItem, ConfigSection } from "@/components/config-item";
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { emitter } from "@/lib/emitter";
 
 export default function OIDCConfiguration() {
@@ -81,11 +82,14 @@ export default function OIDCConfiguration() {
       icon={<ShieldCheck />}
       pageClassName="min-xl:px-64!">
       {enabled === false ? (
-        <ConfigSection>
-          <div className="px-4 py-6 text-sm text-muted-foreground text-center">
-            {$("oidc.not-enabled")}
-          </div>
-        </ConfigSection>
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ShieldCheck />
+            </EmptyMedia>
+            <EmptyTitle>{$("oidc.not-enabled")}</EmptyTitle>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <ConfigSection>
           <ConfigItem

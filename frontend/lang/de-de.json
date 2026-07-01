@@ -56,6 +56,7 @@
   "login.form.input.incorrect": "Falscher Zugriffsschlüssel",
   "login.form.input.temporarily-banned": "Zu viele fehlgeschlagene Versuche, bitte versuchen Sie es später noch einmal",
   "login.form.enter": "Anmelden",
+  "login.form.oidc-description": "Verwenden Sie {0} Single Sign-On, um auf das OPanel-Panel zuzugreifen",
   "login.footer.about": "Über",
   "login.reset.title": "Schlüssel zurücksetzen",
   "login.reset.content.line1": "Wenn Sie der Server-Administrator sind und den Schlüssel verloren haben, können Sie ihn zurücksetzen, indem Sie @b{action1} und den @b{action2}.",

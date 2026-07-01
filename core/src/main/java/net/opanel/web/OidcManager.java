@@ -30,6 +30,7 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.op.OIDCProviderMetadata;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -40,7 +41,7 @@ public class OidcManager {
     private static final long STATE_MAX_AGE_MS = 10 * 60 * 1000; // 10 minutes
     private final ConcurrentHashMap<String, StateEntry> stateStore = new ConcurrentHashMap<>();
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread t = new Thread(r, "OPanel-OIDC-Cleanup");
+        Thread t = new Thread(r, "opanel-oidc-cleanup");
         t.setDaemon(true);
         return t;
     });
@@ -57,7 +58,7 @@ public class OidcManager {
      * Perform OpenID Connect Discovery and cache the provider metadata.
      */
     public void discover(String discoveryUrl, String clientId) throws Exception {
-        Issuer issuer = new Issuer(discoveryUrl);
+        Issuer issuer = new Issuer(discoveryUrl.replaceAll("/+$", ""));
         OIDCProviderMetadata metadata = OIDCProviderMetadata.resolve(issuer);
         this.providerMetadata = metadata;
 
@@ -152,7 +153,12 @@ public class OidcManager {
                     new AuthorizationCodeGrant(code, redirectUriObj));
         }
 
-        TokenResponse tokenResponse = OIDCTokenResponseParser.parse(tokenRequest.toHTTPRequest().send());
+        TokenResponse tokenResponse;
+        try {
+            tokenResponse = OIDCTokenResponseParser.parse(tokenRequest.toHTTPRequest().send());
+        } catch (IOException e) {
+            throw new RuntimeException("OIDC token endpoint unreachable: " + e.getMessage());
+        }
 
         if(!tokenResponse.indicatesSuccess()) {
             throw new RuntimeException("OIDC token request failed: " + tokenResponse.toErrorResponse().getErrorObject().getDescription());
@@ -161,7 +167,12 @@ public class OidcManager {
         OIDCTokenResponse oidcTokenResponse = (OIDCTokenResponse) tokenResponse.toSuccessResponse();
         JWT idToken = oidcTokenResponse.getOIDCTokens().getIDToken();
 
-        IDTokenClaimsSet claimsSet = idTokenValidator.validate(idToken, null);
+        IDTokenClaimsSet claimsSet;
+        try {
+            claimsSet = idTokenValidator.validate(idToken, null);
+        } catch (Exception e) {
+            throw new RuntimeException("OIDC ID token validation failed: " + e.getMessage());
+        }
 
         if(claimsSet.getNonce() == null || !claimsSet.getNonce().getValue().equals(stateEntry.nonce)) {
             throw new RuntimeException("Nonce mismatch in OIDC ID token");

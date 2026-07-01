@@ -56,6 +56,7 @@
   "login.form.input.incorrect": "잘못된 액세스 키",
   "login.form.input.temporarily-banned": "인증 실패 횟수가 너무 많습니다. 나중에 다시 시도해 주세요",
   "login.form.enter": "로그인",
+  "login.form.oidc-description": "{0} 싱글 사인온으로 OPanel 패널에 접속",
   "login.footer.about": "정보",
   "login.reset.title": "키 재설정",
   "login.reset.content.line1": "서버 관리자인데 키를 분실한 경우, @b{action1} 및 @b{action2}을(를) 통해 키를 재설정할 수 있습니다.",

@@ -56,6 +56,7 @@
   "login.form.input.incorrect": "訪問密鑰錯誤",
   "login.form.input.temporarily-banned": "驗證失敗次數太多，請稍後再試",
   "login.form.enter": "登入",
+  "login.form.oidc-description": "使用 {0} 單點登入訪問OPanel面板",
   "login.footer.about": "關於",
   "login.reset.title": "重設密碼",
   "login.reset.content.line1": "如果你是伺服器管理員，且密鑰已經遺失，可以透過@b{action1}和@b{action2}來進行密鑰重置。",

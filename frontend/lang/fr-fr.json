@@ -56,6 +56,7 @@
   "login.form.input.incorrect": "Clé d'accès incorrecte",
   "login.form.input.temporarily-banned": "Trop de tentatives de vérification échouées, veuillez réessayer plus tard",
   "login.form.enter": "Se connecter",
+  "login.form.oidc-description": "Utilisez l'authentification unique {0} pour accéder au panneau OPanel",
   "login.footer.about": "À propos",
   "login.reset.title": "Réinitialiser la clé",
   "login.reset.content.line1": "Si vous êtes l'administrateur du serveur et que la clé est perdue, vous pouvez la réinitialiser en @b{action1} et en @b{action2}.",

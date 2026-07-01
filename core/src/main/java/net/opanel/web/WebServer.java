@@ -137,7 +137,7 @@ public class WebServer {
                 post("/logout", authController.logout);
                 get("oidc/login", oidcController.login);
                 get("oidc/callback", oidcController.callback);
-                post("oidc/verify-secret", oidcController.verifySecret);
+                post("oidc/bind-user", oidcController.bindNewUser);
                 get("oidc/config", oidcController.getConfig);
                 get("oidc/allowed-users", oidcController.getAllowedUsers);
                 post("oidc/allowed-users", oidcController.addAllowedUser);
